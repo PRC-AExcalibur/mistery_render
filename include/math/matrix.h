@@ -15,7 +15,7 @@ namespace m_math
      * @param col: col of this matrix
      */
     template <class T, size_t row, size_t col>
-    class matrix
+    class Matrix
     {
 
     public:
@@ -25,7 +25,7 @@ namespace m_math
          * @brief constructor default (zero matrix);
          * class T must provide constructor T(0)
          */
-        matrix()
+        Matrix()
         {
             for (size_t i = 0; i < row; ++i)
             {
@@ -40,7 +40,7 @@ namespace m_math
          * @brief constructor by elems
          * @param elems: elements of this matrix
          */
-        matrix(const std::array<std::array<T, col>, row> &elem) : elements(elem)
+        Matrix(const std::array<std::array<T, col>, row> &elem) : elements(elem)
         {
         };
 
@@ -48,24 +48,42 @@ namespace m_math
          * @brief constructor copy
          * @param mat: matrix for copy
          */
-        matrix(const matrix &mat) : elements(mat.elements)
+        Matrix(const Matrix &mat) : elements(mat.elements)
         {
         }
 
         /**
          * @brief destructor copy
          */
-        ~matrix()
+        ~Matrix()
         {
         };
 
         /**
          * @brief matrix overload operator=
          */
-        inline matrix<T, row, col> &operator=(const matrix<T, row, col> &rhs)
+        inline Matrix<T, row, col> &operator=(const Matrix<T, row, col> &rhs)
         {
             this->elements = rhs.elements;
             return *this;
+        }
+
+        /**
+         * @brief matrix overload operator==; if T is double, equal will use tolerance of kDoubleAsZero
+         */
+        inline bool operator==(const Matrix<T, row, col> &rhs)
+        {
+            for (size_t i = 0; i < row; ++i)
+            {
+                for (size_t j = 0; j < col; ++j)
+                {
+                    if (!IsEqual(this->elements[i][j], rhs.elements[i][j]))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         /**
@@ -87,7 +105,7 @@ namespace m_math
         /**
          * @brief matrix overload += operator
          */
-        inline friend matrix<T, row, col> &operator+=(matrix &lhs, const matrix &rhs)
+        inline friend Matrix<T, row, col> &operator+=(Matrix &lhs, const Matrix &rhs)
         {
             for (size_t i = 0; i < row; ++i)
             {
@@ -102,7 +120,7 @@ namespace m_math
         /**
          * @brief matrix overload -= operator
          */
-        inline friend matrix<T, row, col> &operator-=(matrix &lhs, const matrix<T, row, col> &rhs)
+        inline friend Matrix<T, row, col> &operator-=(Matrix &lhs, const Matrix<T, row, col> &rhs)
         {
             for (size_t i = 0; i < row; ++i)
             {
@@ -117,7 +135,7 @@ namespace m_math
         /**
          * @brief matrix overload *= operator for scalar
          */
-        inline friend matrix<T, row, col> &operator*=(matrix &lhs, const T scalar)
+        inline friend Matrix<T, row, col> &operator*=(Matrix &lhs, const T scalar)
         {
             for (size_t i = 0; i < row; ++i)
             {
@@ -132,7 +150,7 @@ namespace m_math
         /**
          * @brief matrix overload /= operator for scalar
          */
-        inline friend matrix<T, row, col> &operator/=(matrix &lhs, const T scalar)
+        inline friend Matrix<T, row, col> &operator/=(Matrix &lhs, const T scalar)
         {
             for (size_t i = 0; i < row; ++i)
             {
@@ -147,9 +165,9 @@ namespace m_math
         /**
          * @brief 2 matrix overload operator+
          */
-        inline friend matrix<T, row, col> operator+(const matrix &lhs, const matrix &rhs)
+        inline friend Matrix<T, row, col> operator+(const Matrix &lhs, const Matrix &rhs)
         {
-            matrix<T, row, col> result;
+            Matrix<T, row, col> result;
             for (size_t i = 0; i < row; ++i)
             {
                 for (size_t j = 0; j < col; ++j)
@@ -163,9 +181,9 @@ namespace m_math
         /**
          * @brief 2 matrix overload operator-
          */
-        inline friend matrix<T, row, col> operator-(const matrix &lhs, const matrix &rhs)
+        inline friend Matrix<T, row, col> operator-(const Matrix &lhs, const Matrix &rhs)
         {
-            matrix<T, row, col> result;
+            Matrix<T, row, col> result;
             for (size_t i = 0; i < row; ++i)
             {
                 for (size_t j = 0; j < col; ++j)
@@ -179,9 +197,9 @@ namespace m_math
         /**
          * @brief scalar and matrix overload operator*
          */
-        inline friend matrix<T, row, col> operator*(const T scalar, const matrix &mat)
+        inline friend Matrix<T, row, col> operator*(const T scalar, const Matrix &mat)
         {
-            matrix<T, row, col> result;
+            Matrix<T, row, col> result;
             for (size_t i = 0; i < row; ++i)
             {
                 for (size_t j = 0; j < col; ++j)
@@ -195,9 +213,9 @@ namespace m_math
         /**
          * @brief matrix and scalar overload operator*
          */
-        inline friend matrix<T, row, col> operator*(const matrix &mat, const T scalar)
+        inline friend Matrix<T, row, col> operator*(const Matrix &mat, const T scalar)
         {
-            matrix<T, row, col> result;
+            Matrix<T, row, col> result;
             for (size_t i = 0; i < row; ++i)
             {
                 for (size_t j = 0; j < col; ++j)
@@ -211,9 +229,9 @@ namespace m_math
         /**
          * @brief matrix and scalar overload operator/
          */
-        inline friend matrix<T, row, col> operator/(const matrix &mat, const T scalar)
+        inline friend Matrix<T, row, col> operator/(const Matrix &mat, const T scalar)
         {
-            matrix<T, row, col> result;
+            Matrix<T, row, col> result;
             for (size_t i = 0; i < row; ++i)
             {
                 for (size_t j = 0; j < col; ++j)
@@ -228,9 +246,9 @@ namespace m_math
          * @brief 2 matrix overload operator*
          */
         template <size_t row2>
-        inline friend matrix<T, row, row2> operator*(const matrix<T, row, col> &lhs, const matrix<T, col, row2> &rhs)
+        inline friend Matrix<T, row, row2> operator*(const Matrix<T, row, col> &lhs, const Matrix<T, col, row2> &rhs)
         {
-            matrix<T, row, row2> result;
+            Matrix<T, row, row2> result;
             std::pair<size_t, size_t> ij;
 
             for (size_t i = 0; i < row; ++i)
@@ -247,11 +265,27 @@ namespace m_math
         }
 
         /**
+         * @brief matrix output overload operator<<
+         */
+        inline friend std::ostream& operator<<(std::ostream& os, const Matrix<T, row, col>& m)
+        {
+            for (size_t i = 0; i < row; ++i)
+            {  
+                for (size_t j = 0; j < col; ++j)
+                {
+                    os << m.elements[i][j] << " ";
+                }
+                os << "\n";
+            }
+            return os;
+        }
+
+        /**
          * @brief transpose of matrix
          */
-        inline matrix<T, col, row> transpose() const
+        inline Matrix<T, col, row> Transpose() const
         {
-            matrix<T, col, row> transposed;
+            Matrix<T, col, row> transposed;
             for (size_t i = 0; i < row; ++i)
             {
                 for (size_t j = 0; j < col; ++j)
@@ -267,15 +301,16 @@ namespace m_math
          * @return std::array<std::array<T, col> , row>
          * @retval elements of this matrix
          */
-        inline std::array<std::array<T, col>, row> get_elements() const
+        inline std::array<std::array<T, col>, row> GetElements() const
         {
             return elements;
         }
     };
 
-    typedef matrix<double, 3, 3> matrix3d;
-    typedef matrix<double, 3, 4> matrix_3x4d;
-    typedef matrix<double, 4, 3> matrix_4x3d;
+    typedef Matrix<double, 3, 3> Matrix3d;
+    typedef Matrix<double, 4, 4> Matrix4d;
+    typedef Matrix<double, 3, 4> Matrix_3x4d;
+    typedef Matrix<double, 4, 3> Matrix_4x3d;
 
 }
 

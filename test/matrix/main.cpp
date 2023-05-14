@@ -1,78 +1,106 @@
-# include "../../include/mistery_render.h"
+# include "../test.h"
 
 using namespace mistery_render::m_math;
-
-template<class Tmatrix>
-std::string get_string(Tmatrix m)
-{
-    std::string res;
-    for (auto i : m.get_elements())
-    {
-        for (auto j : i)
-        {
-            res = res + std::to_string(j) + " ";
-        }
-        res += "\n";
-    }
-    return res;
-}
 
 
 void additionTest() 
 {
-    matrix3d mat1({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
-    matrix3d mat2({9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0});
-    matrix3d sum = mat1 + mat2;
-    std::string sumStr = get_string(sum);
-    std::cout << "Addition Test:\n" << sumStr << std::endl;
+    Matrix3d mat1({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+    Matrix3d mat2({9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0});
+    Matrix3d mat_expect({10, 10, 10, 10, 10, 10, 10, 10, 10});
+
+    Matrix3d sum = mat1 + mat2;
+    TestExpect(sum, mat_expect, "Addition Test op+");
+
+    mat1 += mat2;
+    TestExpect(mat1, mat_expect, "Addition & Test op+=");
 }
 
 void subtractionTest() 
 {
-    matrix3d mat1({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
-    matrix3d mat2({9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0});
-    matrix3d difference = mat1 - mat2;
-    std::string differenceStr = get_string(difference);
-    std::cout << "Subtraction Test:\n" << differenceStr << std::endl;
+    Matrix3d mat1({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+    Matrix3d mat2({9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0});
+    Matrix3d mat_expect({-8, -6, -4, -2, 0, 2, 4, 6, 8});
+
+    Matrix3d diff = mat1 - mat2;
+    TestExpect(diff, mat_expect, "Subtraction Test op-");
+
+    mat1 -= mat2;
+    TestExpect(mat1, mat_expect, "Subtraction & Test op-=");
 }
 
 void scalarMultiplicationTest() 
 {
-    matrix3d mat({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+    Matrix3d mat({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
     double s = 2.0;
-    matrix3d scaled = s * mat;
-    std::string scaledStr = get_string(scaled);
-    std::cout << "Scalar Multiplication Test (left):\n" << scaledStr << std::endl;
+    Matrix3d mat_expect({2.0, 4.0, 6.0, 8.0, 10.0, 12, 14, 16, 18});
+
+    Matrix3d scaled = s * mat;
+    TestExpect(scaled, mat_expect, "Scalar Multiplication Test (left) op*");
 
     scaled = mat * s;
-    std::string scaledStr2 = get_string(scaled);
-    std::cout << "Scalar Multiplication Test (right):\n" << scaledStr2 << std::endl;
+    TestExpect(scaled, mat_expect, "Scalar Multiplication Test (right) op*");
+
+    mat *= s;
+    TestExpect(mat, mat_expect, "Scalar Multiplication & Test  op*=");
 }
 
-void matrixMultiplicationTest() {
-    // 定义一个 3x4 矩阵
-    matrix_3x4d mat3x4d ({
+void scalarDivideTest() 
+{
+    Matrix3d mat({1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0});
+    double s = 0.5;
+    Matrix3d mat_expect({2.0, 4.0, 6.0, 8.0, 10.0, 12, 14, 16, 18});
+
+    Matrix3d scaled = mat / s;
+    TestExpect(scaled, mat_expect, "Scalar Divide Test op/");
+
+    mat /= s;
+    TestExpect(mat, mat_expect, "Scalar Divide & Test op/=");
+}
+
+void matrixMultiplicationTest() 
+{
+
+    Matrix_3x4d mat3x4d ({
         1.0, 2.0, 3.0, 4.0,
         5.0, 6.0, 7.0, 8.0,
         9.0, 10.0, 11.0, 12.0
     });
 
-    // 定义一个 4x3 矩阵
-    matrix_4x3d mat4x3d ({
+    Matrix_4x3d mat4x3d ({
         1.0, 5.0, 9.0,
         2.0, 6.0, 10.0,
         3.0, 7.0, 11.0,
         4.0, 8.0, 12.0
     });
 
-    std::cout << "Matrix 3x4:\n" << get_string(mat3x4d) << std::endl;
-    std::cout << "Matrix 4x3:\n" << get_string(mat4x3d) << std::endl;
+    Matrix3d mat_expect({
+        30.000000, 70.000000, 110.000000, 
+        70.000000, 174.000000, 278.000000, 
+        110.000000, 278.000000, 446.000000 
+    });
 
-    matrix3d res = mat3x4d * mat4x3d;
-    std::cout << "Result of 3x4 * 4x3:\n" << get_string(res) << std::endl;
-
+    Matrix3d mat = mat3x4d * mat4x3d;
+    TestExpect(mat, mat_expect, "Matrix Multiplication Test op*");
 }
 
+
+void matrixTranspose()
+{
+    Matrix_3x4d mat3x4d ({
+        1.0, 2.0, 3.0, 4.0,
+        5.0, 6.0, 7.0, 8.0,
+        9.0, 10.0, 11.0, 12.0
+    });
+
+    Matrix_4x3d mat4x3d ({
+        1.0, 5.0, 9.0,
+        2.0, 6.0, 10.0,
+        3.0, 7.0, 11.0,
+        4.0, 8.0, 12.0
+    });
+    TestExpect(mat4x3d.Transpose(), mat3x4d, "Matrix Transpose Test");
+}
 
 
 int main() 
@@ -80,6 +108,8 @@ int main()
     additionTest();
     subtractionTest();
     scalarMultiplicationTest();
+    scalarDivideTest();
     matrixMultiplicationTest();
+    matrixTranspose();
     return 0;
 }
