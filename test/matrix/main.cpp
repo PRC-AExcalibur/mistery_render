@@ -85,7 +85,7 @@ void matrixMultiplicationTest()
 }
 
 
-void matrixTranspose()
+void matrixTransposeTest()
 {
     Matrix_3x4d mat3x4d ({
         1.0, 2.0, 3.0, 4.0,
@@ -102,6 +102,20 @@ void matrixTranspose()
     TestExpect(mat4x3d.Transpose(), mat3x4d, "Matrix Transpose Test");
 }
 
+void matrixIdentityTest()
+{
+    Matrix2d iden_m = Matrix2d::IdentityMatrix();
+    Matrix2d mat_expect ({1,0,0,1});
+    TestExpect(iden_m, mat_expect, "Identity Matrix Test");
+}
+
+void matrixHadamardProductTest()
+{
+    Matrix2d mat1 ({1,2,4,8});
+    Matrix2d mat2 ({8,4,2,1});
+    Matrix2d mat_expect ({8,8,8,8});
+    TestExpect(mat1.HadamardProduct(mat2), mat_expect, "Hadamard Product Matrix Test");
+}
 
 int main() 
 {
@@ -110,6 +124,8 @@ int main()
     scalarMultiplicationTest();
     scalarDivideTest();
     matrixMultiplicationTest();
-    matrixTranspose();
+    matrixTransposeTest();
+    matrixIdentityTest();
+    matrixHadamardProductTest();
     return 0;
 }

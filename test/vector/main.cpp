@@ -82,8 +82,8 @@ void normTest()
     Vector3d normalized = vec.Normalize(); 
     TestExpect(normalized, vec_expect, "Normalize Test");
 
-    vec.Normalized();
-    TestExpect(vec, vec_expect, "Normalized Test");
+    vec.NormalizeInplace();
+    TestExpect(vec, vec_expect, "NormalizeInplace Test");
 }  
 
 void IsZeroTest()   

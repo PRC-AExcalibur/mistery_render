@@ -144,7 +144,7 @@ namespace m_math
          * @brief normalizes the vector in-place
          * @attention norm of the vector must be non-zero
          */ 
-        inline Vector<T, dim>& Normalized()
+        inline Vector<T, dim>& NormalizeInplace()
         {
             T n_tmp = this->Norm();
             for (size_t i = 0; i < dim; i++)

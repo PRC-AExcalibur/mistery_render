@@ -297,6 +297,22 @@ namespace m_math
         }
 
         /**
+         * @brief hadamard product of matrix
+         */
+        inline Matrix<T, col, row> HadamardProduct(const Matrix &rhs) const
+        {
+            Matrix<T, col, row> res;
+            for (size_t i = 0; i < row; ++i)
+            {
+                for (size_t j = 0; j < col; ++j)
+                {
+                    res.elements[j][i] = this->elements[i][j] * rhs.elements[i][j];
+                }
+            }
+            return res;
+        }
+
+        /**
          * @brief get elements of this matrix
          * @return std::array<std::array<T, col> , row>
          * @retval elements of this matrix
@@ -305,8 +321,22 @@ namespace m_math
         {
             return elements;
         }
+
+        /**
+         * @brief get identity matrix
+         */
+        inline static Matrix<T, row, row> IdentityMatrix()
+        {
+            Matrix<T, row, row> iden = Matrix<T, row, row>();
+            for (size_t i = 0; i < row; i++)
+            {
+                iden[i][i] = T(1);
+            }
+            return iden;
+        }
     };
 
+    typedef Matrix<double, 2, 2> Matrix2d;
     typedef Matrix<double, 3, 3> Matrix3d;
     typedef Matrix<double, 4, 4> Matrix4d;
     typedef Matrix<double, 3, 4> Matrix_3x4d;
