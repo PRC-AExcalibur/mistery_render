@@ -6,7 +6,7 @@ void ppmTest()
 {
     double image_width = 256;
     double image_height = 256;
-    ImageRGB<ColorRGB<double>> image_test(image_width, image_height);
+    Image_RGB_d image_test(image_width, image_height);
     for (size_t i = 0; i < image_width; i++) 
     {
         for (size_t j = 0; j < image_height; j++)
