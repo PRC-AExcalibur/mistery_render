@@ -336,11 +336,11 @@ namespace m_math
         }
     };
 
-    typedef Matrix<double, 2, 2> Matrix2d;
-    typedef Matrix<double, 3, 3> Matrix3d;
-    typedef Matrix<double, 4, 4> Matrix4d;
-    typedef Matrix<double, 3, 4> Matrix_3x4d;
-    typedef Matrix<double, 4, 3> Matrix_4x3d;
+    using Matrix2d = Matrix<double, 2, 2>;
+    using Matrix3d = Matrix<double, 3, 3>;
+    using Matrix4d = Matrix<double, 4, 4>;
+    using Matrix_3x4d = Matrix<double, 3, 4>;
+    using Matrix_4x3d = Matrix<double, 4, 3>;
 
 }
 

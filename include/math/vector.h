@@ -184,7 +184,8 @@ namespace m_math
 
     };
 
-    typedef Vector<double,3> Vector3d;
+    using Vector3d = Vector<double,3>;
+    using Vector4d = Vector<double,4>;
 
 }
 
