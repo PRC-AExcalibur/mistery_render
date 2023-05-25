@@ -14,8 +14,8 @@ void ppmTest()
             double r = double(i) / (image_width-1);
             double g = double(j) / (image_height-1);
             double b = 0.0;
-            
-            image_test.image[j][i] = ColorRGB<double>(r,g,b);
+
+            image_test.SetColor(i, j, ColorRGB<double>(r,g,b));
         }
     }
     std::ofstream file("output/test/image_test.ppm");
@@ -23,8 +23,27 @@ void ppmTest()
     file.close();
 }
 
+void DrawLineTest()
+{
+    double image_width = 512;
+    double image_height = 256;
+    Image_RGB_d line_test(image_width, image_height);
+
+    m_math::Vector2i p1({10,10});
+    m_math::Vector2i p2({10,200});
+    m_math::Vector2i p3({200,200});
+    LineDraw(p1,p2,line_test,ColorRGB<double>(1,0,0));
+    LineDraw(p2,p3,line_test,ColorRGB<double>(0,1,0));
+    LineDraw(p1,p3,line_test,ColorRGB<double>(0,0,1));
+
+    std::ofstream file_line("output/test/line_test.ppm");
+    Save2ppm(line_test, file_line);
+    file_line.close();
+}
+
 int main() 
 {
     ppmTest();
+    DrawLineTest();
     return 0;
 }

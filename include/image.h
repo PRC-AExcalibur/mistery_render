@@ -77,9 +77,9 @@ namespace mistery_render
     template <class Color>
     class Image
     {
-    public: 
+    private: 
         std::vector<std::vector<Color>> image;
-
+    public: 
         /**  
          * @brief Constructor with image dimensions.  
          * @param width Width of the image  
@@ -96,6 +96,19 @@ namespace mistery_render
                     image[i][j] = Color();
                 }
             }
+        }
+
+
+        /**  
+         * @brief Get color of element in this image
+         * @attention Not check index < (width or height)
+         * @param width_idx Index of width
+         * @param height_idx Index of height
+         * @param color The color which will be at the image(width_idx, height_idx)
+         */  
+        void SetColor(size_t width_idx, size_t height_idx, const Color& color)
+        {
+            image[height_idx][width_idx] = color;
         }
 
         /**  
@@ -119,6 +132,9 @@ namespace mistery_render
             }
             return image[0].size();
         }
+
+        template <class T>
+        friend std::ostream& Save2ppm(Image<ColorRGB<T>> img, std::ostream& target);
 
     };
 

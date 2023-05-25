@@ -98,23 +98,14 @@ namespace m_math
         /**
          * @brief dot product for 2 vector
          */
-        inline T Dot(const Vector<T, dim> &rhs) const
-        {
-            return (*this)* rhs;
-        }
+        template <class T_f, size_t dim_f>
+        friend T_f Dot(const Vector<T_f, dim_f> &lhs, const Vector<T_f, dim_f> &rhs);
 
         /**
          * @brief cross product for 3D vectors only
          */
-        template<typename = std::enable_if_t<dim == 3>>
-        inline Vector<T, 3> Cross(const Vector<T, dim> &rhs) const
-        {
-            Vector<T, 3> res;
-            res[0] = this->elements[1][0] * rhs[2] - this->elements[2][0] * rhs[1];
-            res[1] = this->elements[2][0] * rhs[0] - this->elements[0][0] * rhs[2];
-            res[2] = this->elements[0][0] * rhs[1] - this->elements[1][0] * rhs[0];
-            return res;
-        }
+        template <class T_f>
+        friend Vector<T_f, 3> Cross(const Vector<T_f, 3> &lhs, const Vector<T_f, 3> &rhs);
 
 
         /**
@@ -169,7 +160,7 @@ namespace m_math
          */ 
         inline bool IsOrthogonal(Vector<T, dim> target) const 
         {
-            return IsEqual(this->Dot(target), T(0));
+            return IsEqual(Dot(*this, target), T(0));
         }
 
         /**    
@@ -184,6 +175,32 @@ namespace m_math
 
     };
 
+    /**
+     * @brief dot product for 2 vector
+     */
+    template <class T_f, size_t dim_f>
+    inline T_f Dot(const Vector<T_f, dim_f> &lhs, const Vector<T_f, dim_f> &rhs)
+    {
+        return lhs * rhs;
+    }
+
+    /**
+     * @brief cross product for 3D vectors only
+     */
+    template <class T_f>
+    inline Vector<T_f, 3> Cross(const Vector<T_f, 3> &lhs, const Vector<T_f, 3> &rhs)
+    {
+        Vector<T_f, 3> res;
+        res[0] = lhs[1] * rhs[2] - lhs[2] * rhs[1];
+        res[1] = lhs[2] * rhs[0] - lhs[0] * rhs[2];
+        res[2] = lhs[0] * rhs[1] - lhs[1] * rhs[0];
+        return res;
+    }
+
+
+
+    using Vector2i = Vector<int,2>;
+    using Vector2d = Vector<double,2>;
     using Vector3d = Vector<double,3>;
     using Vector4d = Vector<double,4>;
 

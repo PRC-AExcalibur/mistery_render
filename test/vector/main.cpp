@@ -56,7 +56,7 @@ void dotProductTest()
 
     double dot = vec1*(vec2);
     TestExpect(dot, expectedDot, "Dot Product Test op*");
-    dot = vec1.Dot(vec2);
+    dot = Dot(vec1, vec2);
     TestExpect(dot, expectedDot, "Dot Product Test");
 }  
   
@@ -66,7 +66,7 @@ void crossProductTest()
     Vector3d vec2({4.0, 5.0, 6.0});  
     Vector3d vec_expect({-3.0, 6.0, -3.0});
   
-    Vector3d cross = vec1.Cross(vec2);
+    Vector3d cross = Cross(vec1, vec2);
     TestExpect(cross, vec_expect, "Cross Product Test");
 }  
   
