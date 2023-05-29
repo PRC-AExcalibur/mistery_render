@@ -85,7 +85,7 @@ namespace mistery_render
          * @param width Width of the image  
          * @param height Height of the image  
          */  
-        Image(size_t width, size_t height)
+        Image(size_t width, size_t height, Color color = Color())
         {
             image.resize(height);
             for (size_t i = 0; i < height; i++)
@@ -93,14 +93,14 @@ namespace mistery_render
                 image[i].resize(width);
                 for (size_t j = 0; j < width; j++)
                 {
-                    image[i][j] = Color();
+                    image[i][j] = color;
                 }
             }
         }
 
 
         /**  
-         * @brief Get color of element in this image
+         * @brief Set color of element in this image
          * @attention Not check index < (width or height)
          * @param width_idx Index of width
          * @param height_idx Index of height
@@ -109,6 +109,23 @@ namespace mistery_render
         void SetColor(size_t width_idx, size_t height_idx, const Color& color)
         {
             image[height_idx][width_idx] = color;
+        }
+
+        /**  
+         * @brief Set color of element in this image
+         * @param width_idx Index of width
+         * @param height_idx Index of height
+         * @param color The color which will be at the image(width_idx, height_idx)
+         * @return The color setting is successful or not
+         */  
+        bool TrySetColor(size_t width_idx, size_t height_idx, const Color& color)
+        {
+            if(height_idx<GetHeight() && width_idx<GetWidth())
+            {
+                image[height_idx][width_idx] = color;
+                return true;
+            }
+            return false;
         }
 
         /**  

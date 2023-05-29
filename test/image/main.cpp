@@ -41,9 +41,28 @@ void DrawLineTest()
     file_line.close();
 }
 
+void DrawCircleTest()
+{
+    double image_width = 512;
+    double image_height = 256;
+    Image_RGB_d circle_test(image_width, image_height);
+
+    m_math::Vector2i p1({10,10});
+    m_math::Vector2i p2({10,100});
+    m_math::Vector2i p3({100,100});
+    CircleDraw(p1,30,circle_test,ColorRGB<double>(1,0,0));
+    CircleDraw(p2,50,circle_test,ColorRGB<double>(0,1,0));
+    CircleDraw(p3,60,circle_test,ColorRGB<double>(0,0,1));
+
+    std::ofstream file_line("output/test/circle_test.ppm");
+    Save2ppm(circle_test, file_line);
+    file_line.close();
+}
+
 int main() 
 {
     ppmTest();
     DrawLineTest();
+    DrawCircleTest();
     return 0;
 }
