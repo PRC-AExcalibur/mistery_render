@@ -100,6 +100,18 @@ namespace mistery_render
 
 
         /**  
+         * @brief Get color of element in this image
+         * @attention Not check index < (width or height)
+         * @param width_idx Index of width
+         * @param height_idx Index of height
+         * @return color The color which is at the image(width_idx, height_idx)
+         */  
+        Color GetColor(size_t width_idx, size_t height_idx)
+        {
+            return image[height_idx][width_idx];
+        }
+
+        /**  
          * @brief Set color of element in this image
          * @attention Not check index < (width or height)
          * @param width_idx Index of width
