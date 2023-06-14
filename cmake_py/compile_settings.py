@@ -13,7 +13,7 @@ def generate_compile_settings(build_type = 'DEBUG'):
     env_list.append(env_base)
 
     # set c_compile_env
-    warn_str = '-Werror -Wall -Wextra -Wshadow -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable '
+    warn_str = '-Werror -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable '
     f_str = '-fPIC -pthread -fno-strict-aliasing -fno-delete-null-pointer-checks -fno-strict-overflow -fsigned-char '
 
     compile_c_str = '-std=gnu17 -ggdb3 ' + warn_str + f_str
