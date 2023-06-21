@@ -33,7 +33,44 @@ void test_obj()
 }
 
 
+void test_scene()
+{
+    std::shared_ptr <tinyobj::ObjReader> obj_reader(new tinyobj::ObjReader());
+
+    std::shared_ptr <std::vector<Material<double>>> material_pool(new std::vector<Material<double>>());
+    std::shared_ptr <std::vector<ModelObj<double>>> model_pool(new std::vector<ModelObj<double>>());
+
+    std::string err = load_obj("../model/cubic/cubic.obj", obj_reader, material_pool, model_pool);
+    if (err.size() != 0)
+    {
+        std::cout << err << "\n";
+        return;
+    }
+    std::cout << "load success\n";
+
+    std::vector<Vertex<double>> vert_buf;
+
+    for (size_t i = 0; i < model_pool->size(); i++)
+    {
+        model_pool->at(i).PushVertexBuffer(vert_buf);
+    }
+
+    Scene scene_test = Scene();
+    scene_test.meshes.emplace_back(vert_buf);
+
+    TestExpect(scene_test.meshes.size(), (size_t)1, "meshes size");
+
+    std::shared_ptr<PrintShader<double>> print_shader(new PrintShader<double>());
+    Camera cma;
+    cma.SetShader(print_shader);
+    cma.UpdateVertexBufferFromScene(scene_test);
+    cma.Render();
+
+}
+
+
 int main(int argc, char *argv[])
 {
     test_obj();
+    //test_scene();
 }

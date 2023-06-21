@@ -92,4 +92,61 @@ namespace mistery_render
         }
     }
 
+    template <class real_t>
+    class Shader
+    {
+    public:
+        virtual ~Shader() {};
+
+        virtual bool VertexShade(std::vector<Vertex<real_t>> &vertex_buffer) = 0;
+
+        virtual bool FragmentShade(std::vector<Vertex<real_t>> &vertex_buffer) = 0;
+
+    };
+
+    template <class real_t>
+    class PrintShader : public Shader<real_t>
+    {
+
+    public:
+
+        PrintShader(){}
+        ~PrintShader(){}
+        virtual bool VertexShade(std::vector<Vertex<real_t>> &vertex_buffer)
+        {
+            for (size_t i = 0; i < vertex_buffer.size(); i++)
+            {
+                std::cout<<"----"<<i<<"----\n";
+                vertex_buffer[i].Print();
+            }
+            return true;
+        }
+        virtual bool FragmentShade(std::vector<Vertex<real_t>> &vertex_buffer) override
+        {
+
+            return true;
+        }
+    };
+
+    template <class real_t>
+    class FlatShader : public Shader<real_t>
+    {
+
+    public:
+        // ColorRGB color = {0,0,0};
+
+        FlatShader(){}
+        ~FlatShader(){}
+        virtual bool VertexShade(std::vector<Vertex<real_t>> &vertex_buffer)
+        {
+            return true;
+        }
+        virtual bool FragmentShade(std::vector<Vertex<real_t>> &vertex_buffer) override
+        {
+
+            return true;
+        }
+    };
+
+
 }
