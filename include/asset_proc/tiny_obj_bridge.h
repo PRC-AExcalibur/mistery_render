@@ -124,7 +124,7 @@ private:
         int mat_id = shape.mesh.material_ids[indices_index % 3];
         // const tinyobj::material_t &mat = obj_->GetMaterials()[mat_id];
         // std::cout<<"id "<<mat_id<<"\n";
-        Vertex<real_t> res({0, 0, 0, -1.0}, {0, 0, 0}, {0, 0}, mat_->at(mat_id));
+        Vertex<real_t> res({0, 0, 0, -1.0}, {0, 0, 0}, {0, 0}, &(mat_->at(mat_id)));
 
         // if (indices_index>=shape.mesh.indices.size() || indices_index<0)
         // {

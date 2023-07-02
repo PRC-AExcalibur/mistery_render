@@ -299,14 +299,14 @@ namespace m_math
         /**
          * @brief hadamard product of matrix
          */
-        inline Matrix<T, col, row> HadamardProduct(const Matrix &rhs) const
+        inline Matrix<T, row, col> HadamardProduct(const Matrix &rhs) const
         {
-            Matrix<T, col, row> res;
+            Matrix<T, row, col> res;
             for (size_t i = 0; i < row; ++i)
             {
                 for (size_t j = 0; j < col; ++j)
                 {
-                    res.elements[j][i] = this->elements[i][j] * rhs.elements[i][j];
+                    res.elements[i][j] = this->elements[i][j] * rhs.elements[i][j];
                 }
             }
             return res;

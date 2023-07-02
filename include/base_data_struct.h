@@ -69,35 +69,6 @@ struct Material
 
 
 /**
- * @brief Base Vertex linked Material
- * @tparam real_t type of real_number in Material
- */
-template <class real_t>
-struct Vertex
-{
-    std::array<real_t, 4> position;
-    std::array<real_t, 3> normal;
-    std::array<real_t, 2> texcoord;
-    const Material<real_t> & material;
-
-    Vertex(const std::array<real_t, 4> &pos, const std::array<real_t, 3> &n, 
-            const std::array<real_t, 2> &texc, const Material<real_t> & mat) : 
-            position(pos), normal(n), texcoord(texc), material(mat)
-    {
-        
-    }
-
-    inline void Print()
-    {
-        PrintContain(position);
-        PrintContain(normal);
-        PrintContain(texcoord);
-    }
-
-
-};
-
-/**
  * @brief Transform struct
  */
 struct Transform
@@ -119,5 +90,43 @@ struct Transform
     }
 
 };
+
+
+/**
+ * @brief Base Vertex linked Material
+ * @tparam real_t type of real_number in Material
+ */
+template <class real_t>
+struct Vertex
+{
+    std::array<real_t, 4> position = {0,0,0,0};
+    std::array<real_t, 3> normal = {0,0,0};
+    std::array<real_t, 2> texcoord = {0,0};
+    Material<real_t> * material = nullptr;
+
+    Transform * transform = nullptr;
+
+    Vertex()
+    {
+
+    }
+
+    Vertex(const std::array<real_t, 4> &pos, const std::array<real_t, 3> &n, 
+            const std::array<real_t, 2> &texc, Material<real_t> * mat) : 
+            position(pos), normal(n), texcoord(texc), material(mat)
+    {
+        
+    }
+
+    inline void Print() const
+    {
+        PrintContain(position);
+        PrintContain(normal);
+        PrintContain(texcoord);
+    }
+
+
+};
+
 
 }

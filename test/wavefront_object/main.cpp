@@ -32,8 +32,8 @@ void test_obj()
 
 }
 
-
-void test_scene()
+template<class shader_t>
+void test_scene(std::shared_ptr<shader_t> shader)
 {
     std::shared_ptr <tinyobj::ObjReader> obj_reader(new tinyobj::ObjReader());
 
@@ -60,11 +60,24 @@ void test_scene()
 
     TestExpect(scene_test.meshes.size(), (size_t)1, "meshes size");
 
-    std::shared_ptr<PrintShader<double>> print_shader(new PrintShader<double>());
-    Camera cma;
-    cma.SetShader(print_shader);
+    scene_test.meshes[0].transform_origin.trans = m_math::Vector3d({200,150,0});
+    scene_test.meshes[0].transform_origin.rot = m_math::Vector3d({1.57,1.57,0})*0.5;
+    scene_test.meshes[0].transform_origin.scal = m_math::Vector3d({75,50,50});
+
+    // std::shared_ptr<shader_t> shader(new shader_t());
+    Image<ColorRGB_d> res_img(400, 300);
+
+    Camera cma0;
+    cma0.transform_origin.scal = m_math::Vector3d({1,1.5,1});
+
+    CameraRender cma(&res_img, &cma0);
+    cma.SetShader(shader);
     cma.UpdateVertexBufferFromScene(scene_test);
     cma.Render();
+
+    std::ofstream file_render("output/test/render_test.ppm");
+    Save2ppm(res_img, file_render);
+    file_render.close();
 
 }
 
@@ -72,5 +85,13 @@ void test_scene()
 int main(int argc, char *argv[])
 {
     test_obj();
-    //test_scene();
+
+    // std::shared_ptr<PrintShader<double, ColorRGB_d>> print_shader(new PrintShader<double, ColorRGB_d>());
+    // test_scene<PrintShader<double, ColorRGB_d>>(print_shader);
+
+    // std::shared_ptr<FlatShader<double, ColorRGB_d>> flat_shader(new FlatShader<double, ColorRGB_d>(ColorRGB_d(1,1,1)));
+    // test_scene<FlatShader<double, ColorRGB_d>>(flat_shader);
+
+    std::shared_ptr<RandomFlatShader<double, ColorRGB_d>> flat_shader(new RandomFlatShader<double, ColorRGB_d>(ColorRGB_d(1,1,1)));
+    test_scene<RandomFlatShader<double, ColorRGB_d>>(flat_shader);
 }
