@@ -31,6 +31,7 @@ void TriangleTest()
     std::ofstream file_triangle("output/test/triangle_test.ppm");
     Save2ppm(triangle_test, file_triangle);
     file_triangle.close();
+    TestExpect(" ", " ", "Base Triangle Shader Test");
 }
 
 

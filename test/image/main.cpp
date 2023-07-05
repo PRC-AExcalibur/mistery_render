@@ -21,6 +21,7 @@ void ppmTest()
     std::ofstream file("output/test/image_test.ppm");
     Save2ppm(image_test, file);
     file.close();
+    TestExpect(" ", " ", "Save PPM Image Test");
 }
 
 void DrawLineTest()
@@ -39,6 +40,7 @@ void DrawLineTest()
     std::ofstream file_line("output/test/line_test.ppm");
     Save2ppm(line_test, file_line);
     file_line.close();
+    TestExpect(" ", " ", "Draw Line Test");
 }
 
 void DrawCircleTest()
@@ -57,6 +59,7 @@ void DrawCircleTest()
     std::ofstream file_line("output/test/circle_test.ppm");
     Save2ppm(circle_test, file_line);
     file_line.close();
+    TestExpect(" ", " ", "Draw Circle Test");
 }
 
 int main() 

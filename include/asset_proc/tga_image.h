@@ -94,7 +94,7 @@ inline bool TGAImage::read_tga_file(const std::string filename) {
         flip_vertically();
     if (header.imagedescriptor & 0x10)
         flip_horizontally();
-    std::cerr << w << "x" << h << "/" << bpp*8 << "\n";
+    // std::cerr << w << "x" << h << "/" << bpp*8 << "\n";
     return true;
 }
 

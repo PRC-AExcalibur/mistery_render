@@ -4,7 +4,7 @@
 #include <array>
 
 #include "tiny_obj_loader.h"
-#include "tga_image.h"
+#include "tga_image_bridge.h"
 #include "../base_data_struct.h"
 
 namespace mistery_render

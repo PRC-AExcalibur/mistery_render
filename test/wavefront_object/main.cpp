@@ -79,6 +79,7 @@ void test_scene(std::shared_ptr<shader_t> shader)
     Save2ppm(res_img, file_render);
     file_render.close();
 
+    TestExpect(" ", " ", "Scene Render Test");
 }
 
 
