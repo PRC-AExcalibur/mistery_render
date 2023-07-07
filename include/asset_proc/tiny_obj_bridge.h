@@ -11,29 +11,30 @@ namespace mistery_render
 {
 
 template <class real_t>
-std::vector<std::vector<std::array<real_t, 3>>> ParseTextureTGA(std::string tex_name)
+std::vector<std::vector<std::array<real_t, 4>>> ParseTextureTGA(std::string tex_name)
 {
     TGAImage tga;
     if (!tga.read_tga_file(tex_name))
     {
         std::cerr << "Error reading TGA file: " << tex_name << std::endl;
-        return {{}}; // 返回空数据表示加载失败
+        return {{}};
     }
 
-    std::vector<std::vector<std::array<real_t, 3>>> texture(tga.height(), std::vector<std::array<real_t, 3>>(tga.width()));
+    std::vector<std::vector<std::array<real_t, 4>>> texture(tga.height(), std::vector<std::array<real_t, 4>>(tga.width()));
     for (int y = 0; y < tga.height(); ++y)
     {
         for (int x = 0; x < tga.width(); ++x)
         {
             TGAColor pixel = tga.get(x, y);
-            texture[y][x] = {static_cast<real_t>(pixel[2]) / 255.0f, static_cast<real_t>(pixel[1]) / 255.0f, static_cast<real_t>(pixel[0]) / 255.0f}; // 注意: TGA中BGR顺序
+            texture[y][x] = {static_cast<real_t>(pixel[2]) / 255.0f, static_cast<real_t>(pixel[1]) / 255.0f, 
+                            static_cast<real_t>(pixel[0]) / 255.0f, static_cast<real_t>(pixel[3]) / 255.0f};
         }
     }
     return texture;
 }
 
 template <class real_t>
-std::vector<std::vector<std::array<real_t, 3>>> LoadTexture(std::string tex_name)
+std::vector<std::vector<std::array<real_t, 4>>> LoadTexture(std::string tex_name)
 {
     if (tex_name.size()==0)
     {

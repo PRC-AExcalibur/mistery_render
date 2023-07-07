@@ -41,14 +41,14 @@ struct Material
 
     int dummy;  // Suppress padding warning.
     
-    std::vector<std::vector<std::array<real_t, 3>>> ambient_tex;             // map_Ka
-    std::vector<std::vector<std::array<real_t, 3>>> diffuse_tex;             // map_Kd
-    std::vector<std::vector<std::array<real_t, 3>>> specular_tex;            // map_Ks
-    std::vector<std::vector<std::array<real_t, 3>>> specular_highlight_tex;  // map_Ns
-    std::vector<std::vector<std::array<real_t, 3>>> bump_tex;                // map_bump, map_Bump, bump
-    std::vector<std::vector<std::array<real_t, 3>>> displacement_tex;        // disp
-    std::vector<std::vector<std::array<real_t, 3>>> alpha_tex;               // map_d
-    std::vector<std::vector<std::array<real_t, 3>>> reflection_tex;          // refl
+    std::vector<std::vector<std::array<real_t, 4>>> ambient_tex;             // map_Ka
+    std::vector<std::vector<std::array<real_t, 4>>> diffuse_tex;             // map_Kd
+    std::vector<std::vector<std::array<real_t, 4>>> specular_tex;            // map_Ks
+    std::vector<std::vector<std::array<real_t, 4>>> specular_highlight_tex;  // map_Ns
+    std::vector<std::vector<std::array<real_t, 4>>> bump_tex;                // map_bump, map_Bump, bump
+    std::vector<std::vector<std::array<real_t, 4>>> displacement_tex;        // disp
+    std::vector<std::vector<std::array<real_t, 4>>> alpha_tex;               // map_d
+    std::vector<std::vector<std::array<real_t, 4>>> reflection_tex;          // refl
 
     // PBR extension
     real_t roughness;            // [0, 1] default 0
@@ -60,11 +60,11 @@ struct Material
     real_t anisotropy_rotation;  // anisor. [0, 1] default 0
     real_t pad0;
 
-    std::vector<std::vector<std::array<real_t, 3>>> roughness_tex;  // map_Pr
-    std::vector<std::vector<std::array<real_t, 3>>> metallic_tex;   // map_Pm
-    std::vector<std::vector<std::array<real_t, 3>>> sheen_tex;      // map_Ps
-    std::vector<std::vector<std::array<real_t, 3>>> emissive_tex;   // map_Ke
-    std::vector<std::vector<std::array<real_t, 3>>> normal_tex;     // norm. For normal mapping.
+    std::vector<std::vector<std::array<real_t, 4>>> roughness_tex;  // map_Pr
+    std::vector<std::vector<std::array<real_t, 4>>> metallic_tex;   // map_Pm
+    std::vector<std::vector<std::array<real_t, 4>>> sheen_tex;      // map_Ps
+    std::vector<std::vector<std::array<real_t, 4>>> emissive_tex;   // map_Ke
+    std::vector<std::vector<std::array<real_t, 4>>> normal_tex;     // norm. For normal mapping.
 };
 
 

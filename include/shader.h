@@ -1,6 +1,7 @@
 #pragma once
 
 #include "image.h"
+#include "texture.h"
 #include <random>
 
 namespace mistery_render
