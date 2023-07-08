@@ -6,6 +6,7 @@
 #include "tiny_obj_loader.h"
 #include "tga_image_bridge.h"
 #include "../base_data_struct.h"
+#include "../test.h"
 
 namespace mistery_render
 {
@@ -33,32 +34,36 @@ std::vector<std::vector<std::array<real_t, 4>>> ParseTextureTGA(std::string tex_
     return texture;
 }
 
-template <class real_t>
-std::vector<std::vector<std::array<real_t, 4>>> LoadTexture(std::string tex_name)
+template <class real_t, size_t tex_n>
+std::vector<std::vector<std::array<real_t, 4>>> * LoadTexture(std::string tex_name, std::shared_ptr<TexturePool<real_t, tex_n>> texture_pool)
 {
     if (tex_name.size()==0)
     {
-        return {{}};
+        return nullptr;
     }
     
     size_t dot_position = tex_name.find_last_of('.');
     if (!(dot_position != 0 && dot_position != tex_name.length() - 1))
     {
-        return {{}};
+        return nullptr;
     }
     std::string file_type = tex_name.substr(dot_position + 1);
 
     if (file_type.compare("tga")==0)
     {
-        return ParseTextureTGA<real_t>(tex_name);
+        if (texture_pool->GetTexture(tex_name) == nullptr)
+        {
+            texture_pool->InsertTexture(tex_name, ParseTextureTGA<real_t>(tex_name));
+        }
+        return texture_pool->GetTexture(tex_name);
     }
 
-    return {{}};
+    return nullptr;
 
 }
 
-template <class real_t>
-inline Material<real_t> MatObjToMaterial(const tinyobj::material_t &srcMat)
+template <class real_t, size_t tex_n>
+inline Material<real_t> MatObjToMaterial(const tinyobj::material_t &srcMat, std::shared_ptr<TexturePool<real_t, tex_n>> texture_pool, const std::string& path = "")
 {
     Material<real_t> dstMat;
 
@@ -77,14 +82,14 @@ inline Material<real_t> MatObjToMaterial(const tinyobj::material_t &srcMat)
     dstMat.dummy = srcMat.dummy;
 
     // Copy texture names
-    dstMat.ambient_tex = LoadTexture<real_t>(srcMat.ambient_texname);
-    dstMat.diffuse_tex = LoadTexture<real_t>(srcMat.diffuse_texname);
-    dstMat.specular_tex = LoadTexture<real_t>(srcMat.specular_texname);
-    dstMat.specular_highlight_tex = LoadTexture<real_t>(srcMat.specular_highlight_texname);
-    dstMat.bump_tex = LoadTexture<real_t>(srcMat.bump_texname);
-    dstMat.displacement_tex = LoadTexture<real_t>(srcMat.displacement_texname);
-    dstMat.alpha_tex = LoadTexture<real_t>(srcMat.alpha_texname);
-    dstMat.reflection_tex = LoadTexture<real_t>(srcMat.reflection_texname);
+    dstMat.ambient_tex = LoadTexture<real_t>(path + srcMat.ambient_texname, texture_pool);
+    dstMat.diffuse_tex = LoadTexture<real_t>(path + srcMat.diffuse_texname, texture_pool);
+    dstMat.specular_tex = LoadTexture<real_t>(path + srcMat.specular_texname, texture_pool);
+    dstMat.specular_highlight_tex = LoadTexture<real_t>(path + srcMat.specular_highlight_texname, texture_pool);
+    dstMat.bump_tex = LoadTexture<real_t>(path + srcMat.bump_texname, texture_pool);
+    dstMat.displacement_tex = LoadTexture<real_t>(path + srcMat.displacement_texname, texture_pool);
+    dstMat.alpha_tex = LoadTexture<real_t>(path + srcMat.alpha_texname, texture_pool);
+    dstMat.reflection_tex = LoadTexture<real_t>(path + srcMat.reflection_texname, texture_pool);
 
     // Copy PBR properties
     dstMat.roughness = srcMat.roughness;
@@ -96,11 +101,11 @@ inline Material<real_t> MatObjToMaterial(const tinyobj::material_t &srcMat)
     dstMat.anisotropy_rotation = srcMat.anisotropy_rotation;
     dstMat.pad0 = srcMat.pad0;
 
-    dstMat.roughness_tex = LoadTexture<real_t>(srcMat.roughness_texname);
-    dstMat.metallic_tex = LoadTexture<real_t>(srcMat.metallic_texname);
-    dstMat.sheen_tex = LoadTexture<real_t>(srcMat.sheen_texname);
-    dstMat.emissive_tex = LoadTexture<real_t>(srcMat.emissive_texname);
-    dstMat.normal_tex = LoadTexture<real_t>(srcMat.normal_texname);
+    dstMat.roughness_tex = LoadTexture<real_t>(path + srcMat.roughness_texname, texture_pool);
+    dstMat.metallic_tex = LoadTexture<real_t>(path + srcMat.metallic_texname, texture_pool);
+    dstMat.sheen_tex = LoadTexture<real_t>(path + srcMat.sheen_texname, texture_pool);
+    dstMat.emissive_tex = LoadTexture<real_t>(path + srcMat.emissive_texname, texture_pool);
+    dstMat.normal_tex = LoadTexture<real_t>(path + srcMat.normal_texname, texture_pool);
 
     return dstMat;
 }
@@ -179,11 +184,12 @@ public:
     }
 };
 
-template <class real_t>
+template <class real_t, size_t tex_n>
 inline std::string load_obj(const std::string &obj_path,
                             std::shared_ptr<tinyobj::ObjReader> obj_reader,
                             std::shared_ptr<std::vector<Material<real_t>>> material_list,
-                            std::shared_ptr<std::vector<ModelObj<real_t>>> model_list)
+                            std::shared_ptr<std::vector<ModelObj<real_t>>> model_list, 
+                            std::shared_ptr<TexturePool<real_t, tex_n>> texture_pool)
 {
     tinyobj::ObjReaderConfig config;
     config.triangulate = true;
@@ -193,9 +199,11 @@ inline std::string load_obj(const std::string &obj_path,
         if (obj_reader->Valid())
         {
             const std::vector<tinyobj::material_t> mats = obj_reader->GetMaterials();
+            size_t last_slash_idx = obj_path.find_last_of('/');
+            std::string mats_path = (last_slash_idx == std::string::npos) ? "" : obj_path.substr(0, last_slash_idx+1);
             for (size_t i = 0; i < mats.size(); i++)
             {
-                material_list->push_back(MatObjToMaterial<double>(mats[i]));
+                material_list->push_back(MatObjToMaterial<double>(mats[i], texture_pool, mats_path));
             }
             for (size_t i = 0; i < obj_reader->GetShapes().size(); i++)
             {

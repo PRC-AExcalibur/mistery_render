@@ -10,10 +10,10 @@ void additionTest()
     Matrix3d mat_expect({10, 10, 10, 10, 10, 10, 10, 10, 10});
 
     Matrix3d sum = mat1 + mat2;
-    TestExpect(sum, mat_expect, "Addition Test op+");
+    mistery_render::TestExpect(sum, mat_expect, "Addition Test op+");
 
     mat1 += mat2;
-    TestExpect(mat1, mat_expect, "Addition & Test op+=");
+    mistery_render::TestExpect(mat1, mat_expect, "Addition & Test op+=");
 }
 
 void subtractionTest() 
@@ -23,10 +23,10 @@ void subtractionTest()
     Matrix3d mat_expect({-8, -6, -4, -2, 0, 2, 4, 6, 8});
 
     Matrix3d diff = mat1 - mat2;
-    TestExpect(diff, mat_expect, "Subtraction Test op-");
+    mistery_render::TestExpect(diff, mat_expect, "Subtraction Test op-");
 
     mat1 -= mat2;
-    TestExpect(mat1, mat_expect, "Subtraction & Test op-=");
+    mistery_render::TestExpect(mat1, mat_expect, "Subtraction & Test op-=");
 }
 
 void scalarMultiplicationTest() 
@@ -36,13 +36,13 @@ void scalarMultiplicationTest()
     Matrix3d mat_expect({2.0, 4.0, 6.0, 8.0, 10.0, 12, 14, 16, 18});
 
     Matrix3d scaled = s * mat;
-    TestExpect(scaled, mat_expect, "Scalar Multiplication Test (left) op*");
+    mistery_render::TestExpect(scaled, mat_expect, "Scalar Multiplication Test (left) op*");
 
     scaled = mat * s;
-    TestExpect(scaled, mat_expect, "Scalar Multiplication Test (right) op*");
+    mistery_render::TestExpect(scaled, mat_expect, "Scalar Multiplication Test (right) op*");
 
     mat *= s;
-    TestExpect(mat, mat_expect, "Scalar Multiplication & Test  op*=");
+    mistery_render::TestExpect(mat, mat_expect, "Scalar Multiplication & Test  op*=");
 }
 
 void scalarDivideTest() 
@@ -52,10 +52,10 @@ void scalarDivideTest()
     Matrix3d mat_expect({2.0, 4.0, 6.0, 8.0, 10.0, 12, 14, 16, 18});
 
     Matrix3d scaled = mat / s;
-    TestExpect(scaled, mat_expect, "Scalar Divide Test op/");
+    mistery_render::TestExpect(scaled, mat_expect, "Scalar Divide Test op/");
 
     mat /= s;
-    TestExpect(mat, mat_expect, "Scalar Divide & Test op/=");
+    mistery_render::TestExpect(mat, mat_expect, "Scalar Divide & Test op/=");
 }
 
 void matrixMultiplicationTest() 
@@ -81,7 +81,7 @@ void matrixMultiplicationTest()
     });
 
     Matrix3d mat = mat3x4d * mat4x3d;
-    TestExpect(mat, mat_expect, "Matrix Multiplication Test op*");
+    mistery_render::TestExpect(mat, mat_expect, "Matrix Multiplication Test op*");
 }
 
 
@@ -99,14 +99,14 @@ void matrixTransposeTest()
         3.0, 7.0, 11.0,
         4.0, 8.0, 12.0
     });
-    TestExpect(mat4x3d.Transpose(), mat3x4d, "Matrix Transpose Test");
+    mistery_render::TestExpect(mat4x3d.Transpose(), mat3x4d, "Matrix Transpose Test");
 }
 
 void matrixIdentityTest()
 {
     Matrix2d iden_m = Matrix2d::IdentityMatrix();
     Matrix2d mat_expect ({1,0,0,1});
-    TestExpect(iden_m, mat_expect, "Identity Matrix Test");
+    mistery_render::TestExpect(iden_m, mat_expect, "Identity Matrix Test");
 }
 
 void matrixHadamardProductTest()
@@ -114,7 +114,7 @@ void matrixHadamardProductTest()
     Matrix2d mat1 ({1,2,4,8});
     Matrix2d mat2 ({8,4,2,1});
     Matrix2d mat_expect ({8,8,8,8});
-    TestExpect(mat1.HadamardProduct(mat2), mat_expect, "Hadamard Product Matrix Test");
+    mistery_render::TestExpect(mat1.HadamardProduct(mat2), mat_expect, "Hadamard Product Matrix Test");
 }
 
 int main() 

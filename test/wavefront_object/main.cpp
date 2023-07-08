@@ -10,8 +10,9 @@ void test_obj()
 
     std::shared_ptr <std::vector<Material<double>>> material_pool(new std::vector<Material<double>>());
     std::shared_ptr <std::vector<ModelObj<double>>> model_pool(new std::vector<ModelObj<double>>());
+    std::shared_ptr <TexturePool<double, 1024>> tex_pool(new TexturePool<double, 1024>());
 
-    std::string err = load_obj<double>("../model/cubic/cubic.obj", obj_reader, material_pool, model_pool);
+    std::string err = load_obj<double>("../model/cubic/cubic.obj", obj_reader, material_pool, model_pool, tex_pool);
     if (err.size() != 0)
     {
         std::cout << err << "\n";
@@ -35,19 +36,26 @@ void test_obj()
 template<class shader_t>
 void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
 {
+    double ts = NowTime(1);
+
     std::shared_ptr <tinyobj::ObjReader> obj_reader(new tinyobj::ObjReader());
 
     std::shared_ptr <std::vector<Material<double>>> material_pool(new std::vector<Material<double>>());
     std::shared_ptr <std::vector<ModelObj<double>>> model_pool(new std::vector<ModelObj<double>>());
+    std::shared_ptr <TexturePool<double, 1024>> tex_pool(new TexturePool<double, 1024>());
 
-    std::string err = load_obj(path, obj_reader, material_pool, model_pool);
+    std::string err = load_obj<double>(path, obj_reader, material_pool, model_pool, tex_pool);
+
 
     if (err.size() != 0)
     {
         std::cout << err << "\n";
         return;
     }
-    std::cout << "load success\n";
+    double te = NowTime(1);
+    std::cout << "load success: using "<<te-ts<<" ms\n";
+
+    ts = NowTime(1);
 
     std::vector<Vertex<double>> vert_buf;
 
@@ -70,6 +78,10 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
     scene_test.meshes[0].transform_origin.rot = m_math::Vector3d({0,0,3.14});
     scene_test.meshes[0].transform_origin.scal = m_math::Vector3d({1,1,1})*300;
 
+    te = NowTime(1);
+    std::cout << "make scene success: using "<<te-ts<<" ms\n";
+
+    ts = NowTime(1);
     // std::shared_ptr<shader_t> shader(new shader_t());
     Image<ColorRGB_d> res_img(800, 600);
 
@@ -81,6 +93,8 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
     cma.UpdateVertexBufferFromScene(scene_test);
     cma.Render();
 
+    std::cout << "render success: using "<<te-ts<<" ms\n";
+
     std::ofstream file_render("output/test/render_test.ppm");
     Save2ppm(res_img, file_render);
     file_render.close();
@@ -91,7 +105,7 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
 
 int main(int argc, char *argv[])
 {
-    test_obj();
+    // test_obj();
 
     // std::shared_ptr<PrintShader<double, ColorRGB_d>> print_shader(new PrintShader<double, ColorRGB_d>());
     // test_scene<PrintShader<double, ColorRGB_d>>(print_shader, "../model/cubic/cubic.obj");

@@ -3,6 +3,7 @@
 #include <memory>
 #include <array>
 #include <iostream>
+#include <map>
 
 #include "srt.h"
 
@@ -41,14 +42,14 @@ struct Material
 
     int dummy;  // Suppress padding warning.
     
-    std::vector<std::vector<std::array<real_t, 4>>> ambient_tex;             // map_Ka
-    std::vector<std::vector<std::array<real_t, 4>>> diffuse_tex;             // map_Kd
-    std::vector<std::vector<std::array<real_t, 4>>> specular_tex;            // map_Ks
-    std::vector<std::vector<std::array<real_t, 4>>> specular_highlight_tex;  // map_Ns
-    std::vector<std::vector<std::array<real_t, 4>>> bump_tex;                // map_bump, map_Bump, bump
-    std::vector<std::vector<std::array<real_t, 4>>> displacement_tex;        // disp
-    std::vector<std::vector<std::array<real_t, 4>>> alpha_tex;               // map_d
-    std::vector<std::vector<std::array<real_t, 4>>> reflection_tex;          // refl
+    std::vector<std::vector<std::array<real_t, 4>>> * ambient_tex = nullptr;             // map_Ka
+    std::vector<std::vector<std::array<real_t, 4>>> * diffuse_tex = nullptr;             // map_Kd
+    std::vector<std::vector<std::array<real_t, 4>>> * specular_tex = nullptr;            // map_Ks
+    std::vector<std::vector<std::array<real_t, 4>>> * specular_highlight_tex = nullptr;  // map_Ns
+    std::vector<std::vector<std::array<real_t, 4>>> * bump_tex = nullptr;                // map_bump, map_Bump, bump
+    std::vector<std::vector<std::array<real_t, 4>>> * displacement_tex = nullptr;        // disp
+    std::vector<std::vector<std::array<real_t, 4>>> * alpha_tex = nullptr;               // map_d
+    std::vector<std::vector<std::array<real_t, 4>>> * reflection_tex = nullptr;          // refl
 
     // PBR extension
     real_t roughness;            // [0, 1] default 0
@@ -60,11 +61,59 @@ struct Material
     real_t anisotropy_rotation;  // anisor. [0, 1] default 0
     real_t pad0;
 
-    std::vector<std::vector<std::array<real_t, 4>>> roughness_tex;  // map_Pr
-    std::vector<std::vector<std::array<real_t, 4>>> metallic_tex;   // map_Pm
-    std::vector<std::vector<std::array<real_t, 4>>> sheen_tex;      // map_Ps
-    std::vector<std::vector<std::array<real_t, 4>>> emissive_tex;   // map_Ke
-    std::vector<std::vector<std::array<real_t, 4>>> normal_tex;     // norm. For normal mapping.
+    std::vector<std::vector<std::array<real_t, 4>>> * roughness_tex = nullptr;  // map_Pr
+    std::vector<std::vector<std::array<real_t, 4>>> * metallic_tex = nullptr;   // map_Pm
+    std::vector<std::vector<std::array<real_t, 4>>> * sheen_tex = nullptr;      // map_Ps
+    std::vector<std::vector<std::array<real_t, 4>>> * emissive_tex = nullptr;   // map_Ke
+    std::vector<std::vector<std::array<real_t, 4>>> * normal_tex = nullptr;     // norm. For normal mapping.
+};
+
+template <class real_t, size_t size_n>
+struct TexturePool
+{
+private:
+    std::map<std::string, size_t> tex_map;
+    std::array<std::vector<std::vector<std::array<real_t, 4>>>, size_n> tex_array;
+public:
+    bool InsertTexture(const std::string &name, const std::vector<std::vector<std::array<real_t, 4>>> &textureData)
+    {
+        // if (tex_map.find(name) != tex_map.end())
+        // {
+        //     return false;
+        // }
+
+        for (size_t i = 0; i < tex_array.size(); ++i)
+        {
+            if (tex_array[i].empty())
+            {
+                tex_array[i] = textureData;
+                tex_map[name] = i;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool DeleteTexture(const std::string &name)
+    {
+        auto it = tex_map.find(name);
+        if (it == tex_map.end())
+        {
+            return false;
+        }
+        tex_array[it->second].resize(0);
+        return true;
+    }
+
+    std::vector<std::vector<std::array<real_t, 4>>> *  GetTexture(const std::string &name)
+    {
+        auto it = tex_map.find(name);
+        if (it == tex_map.end())
+        {
+            return nullptr;
+        }
+        return &(tex_array[it->second]);
+    }
 };
 
 

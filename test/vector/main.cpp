@@ -10,10 +10,10 @@ void additionTest()
     Vector3d vec_expect({10, 10, 10});
 
     Vector3d sum = vec1 + vec2;
-    TestExpect(sum, vec_expect, "Addition Test op+");
+    mistery_render::TestExpect(sum, vec_expect, "Addition Test op+");
 
     vec1 += vec2;
-    TestExpect(vec1, vec_expect, "Addition & Test op+=");
+    mistery_render::TestExpect(vec1, vec_expect, "Addition & Test op+=");
 }
 
 void subtractionTest() 
@@ -23,10 +23,10 @@ void subtractionTest()
     Vector3d vec_expect({-8, -6, -4});
 
     Vector3d diff = vec1 - vec2;
-    TestExpect(diff, vec_expect, "Subtraction Test op-");
+    mistery_render::TestExpect(diff, vec_expect, "Subtraction Test op-");
 
     vec1 -= vec2;
-    TestExpect(vec1, vec_expect, "Subtraction & Test op-=");
+    mistery_render::TestExpect(vec1, vec_expect, "Subtraction & Test op-=");
 
 }
 
@@ -37,13 +37,13 @@ void scalarMultiplicationTest()
     Vector3d vec_expect({2.0, 4.0, 6.0});
 
     Vector3d scaled = s * vec;
-    TestExpect(scaled, vec_expect, "Scalar Multiplication Test (left) op*");
+    mistery_render::TestExpect(scaled, vec_expect, "Scalar Multiplication Test (left) op*");
 
     scaled = vec * s;
-    TestExpect(scaled, vec_expect, "Scalar Multiplication Test (right) op*");
+    mistery_render::TestExpect(scaled, vec_expect, "Scalar Multiplication Test (right) op*");
 
     vec *= s;
-    TestExpect(vec, vec_expect, "Scalar Multiplication & Test  op*=");
+    mistery_render::TestExpect(vec, vec_expect, "Scalar Multiplication & Test  op*=");
 }
 
 
@@ -55,9 +55,9 @@ void dotProductTest()
     double expectedDot = 32.0;
 
     double dot = vec1*(vec2);
-    TestExpect(dot, expectedDot, "Dot Product Test op*");
+    mistery_render::TestExpect(dot, expectedDot, "Dot Product Test op*");
     dot = Dot(vec1, vec2);
-    TestExpect(dot, expectedDot, "Dot Product Test");
+    mistery_render::TestExpect(dot, expectedDot, "Dot Product Test");
 }  
   
 void crossProductTest() 
@@ -67,7 +67,7 @@ void crossProductTest()
     Vector3d vec_expect({-3.0, 6.0, -3.0});
   
     Vector3d cross = Cross(vec1, vec2);
-    TestExpect(cross, vec_expect, "Cross Product Test");
+    mistery_render::TestExpect(cross, vec_expect, "Cross Product Test");
 }  
   
 void normTest() 
@@ -76,14 +76,14 @@ void normTest()
     double expectedNorm = 5.0;
   
     double norm = vec.Norm();
-    TestExpect(norm, expectedNorm, "Norm Test");
+    mistery_render::TestExpect(norm, expectedNorm, "Norm Test");
 
     Vector3d vec_expect({0.6, 0.8, 0});
     Vector3d normalized = vec.Normalize(); 
-    TestExpect(normalized, vec_expect, "Normalize Test");
+    mistery_render::TestExpect(normalized, vec_expect, "Normalize Test");
 
     vec.NormalizeInplace();
-    TestExpect(vec, vec_expect, "NormalizeInplace Test");
+    mistery_render::TestExpect(vec, vec_expect, "NormalizeInplace Test");
 }  
 
 void IsZeroTest()   
@@ -91,8 +91,8 @@ void IsZeroTest()
     Vector3d zeroVec({0.5*kDoubleAsZero, 0.0, 0.0});
     Vector3d nonZeroVec({1.0, 2.0, 3.0});
   
-    TestExpect(zeroVec.IsZero(), true, "IsZero Test for zero vector");
-    TestExpect(nonZeroVec.IsZero(), false, "IsZero Test for non-zero vector");
+    mistery_render::TestExpect(zeroVec.IsZero(), true, "IsZero Test for zero vector");
+    mistery_render::TestExpect(nonZeroVec.IsZero(), false, "IsZero Test for non-zero vector");
 }  
   
 void IsOrthogonalTest()   
@@ -101,8 +101,8 @@ void IsOrthogonalTest()
     Vector3d vec2({0.0, 1.0, 0.0});  
     Vector3d vec3({1.0, 1.0, 1.0});  
   
-    TestExpect(vec1.IsOrthogonal(vec2), true, "IsOrthogonal Test for orthogonal vectors");
-    TestExpect(vec1.IsOrthogonal(vec3), false, "IsOrthogonal Test for non-orthogonal vectors");
+    mistery_render::TestExpect(vec1.IsOrthogonal(vec2), true, "IsOrthogonal Test for orthogonal vectors");
+    mistery_render::TestExpect(vec1.IsOrthogonal(vec3), false, "IsOrthogonal Test for non-orthogonal vectors");
 }  
   
 void IsParallelTest()   
@@ -111,8 +111,8 @@ void IsParallelTest()
     Vector3d vec2({2.0, 4.0, 6.0});  
     Vector3d vec3({7.0, 5.0, 3.0});  
   
-    TestExpect(vec1.IsParallel(vec2), true, "IsParallel Test for parallel vectors");
-    TestExpect(vec1.IsParallel(vec3), false, "IsParallel Test for non-parallel vectors");
+    mistery_render::TestExpect(vec1.IsParallel(vec2), true, "IsParallel Test for parallel vectors");
+    mistery_render::TestExpect(vec1.IsParallel(vec3), false, "IsParallel Test for non-parallel vectors");
 }
 
 int main() 

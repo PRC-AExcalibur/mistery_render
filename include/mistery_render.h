@@ -9,6 +9,7 @@
 #include "asset_proc/tiny_obj_bridge.h"
 #include "shader.h"
 #include "scene.h"
+#include "test.h"
 
 namespace mistery_render
 {
