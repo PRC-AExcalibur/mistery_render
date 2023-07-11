@@ -66,26 +66,26 @@ public:
 
 };
 
-
+template <class color_t>
 class CameraRender
 {
-    friend Shader<double, ColorRGB_d>;
+    friend Shader<double, color_t>;
 private:
-    std::shared_ptr<Shader<double, ColorRGB_d>> shader = nullptr;
+    std::shared_ptr<Shader<double, color_t>> shader = nullptr;
     std::vector<Vertex<double>> vert_buf;
 
 public:
-    Image<ColorRGB_d> * img;
+    Image<color_t> * img;
     Camera * camera;
 
-    CameraRender(Image<ColorRGB_d> * img_ptr, Camera * cma)
+    CameraRender(Image<color_t> * img_ptr, Camera * cma)
     {
         vert_buf.reserve(100000);
         img = img_ptr;
         camera = cma;
     }
 
-    void SetShader(std::shared_ptr<Shader<double, ColorRGB_d>> shader_ptr)
+    void SetShader(std::shared_ptr<Shader<double, color_t>> shader_ptr)
     {
         shader = shader_ptr;
         shader->SetImgPtr(img);

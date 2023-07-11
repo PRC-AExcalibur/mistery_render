@@ -22,6 +22,13 @@ namespace mistery_render
         ColorRGB() : m_math::Vector<T,3>()
         {
         }
+        /**
+         * @brief constructor by Vector<T, n>
+         * @param vec: vector
+         */
+        ColorRGB(const m_math::Vector<T,3> &vec) : m_math::Vector<T,3>(vec)
+        {
+        }
         /**  
          * @brief Constructor with RGB values.  
          * @param r Red component  
@@ -50,6 +57,13 @@ namespace mistery_render
          * @brief Default constructor.  
          */ 
         ColorRGBA() : m_math::Vector<T,4>()
+        {
+        }
+        /**
+         * @brief constructor by Vector<T, n>
+         * @param vec: vector
+         */
+        ColorRGBA(const m_math::Vector<T,4> &vec) : m_math::Vector<T,4>(vec)
         {
         }
         /**  
@@ -162,8 +176,8 @@ namespace mistery_render
             return image[0].size();
         }
 
-        template <class T>
-        friend std::ostream& Save2ppm(Image<ColorRGB<T>> img, std::ostream& target);
+        template <class color_t>
+        friend std::ostream& Save2ppm(Image<color_t> img, std::ostream& target);
 
     };
 
@@ -173,8 +187,8 @@ namespace mistery_render
      * @param target Output stream to write to  
      * @return Reference to the output stream  
      */  
-    template <class T>
-    inline std::ostream& Save2ppm(ColorRGB<T> rgb, std::ostream& target)
+    template <class color_t>
+    inline std::ostream& Save2ppm(color_t rgb, std::ostream& target)
     {
         int ir = int(255.999 * rgb[0]);
         int ig = int(255.999 * rgb[1]);
@@ -189,8 +203,8 @@ namespace mistery_render
      * @param target Output stream to write to  
      * @return Reference to the output stream  
      */  
-    template <class T>
-    inline std::ostream& Save2ppm(Image<ColorRGB<T>> img, std::ostream& target)
+    template <class color_t>
+    inline std::ostream& Save2ppm(Image<color_t> img, std::ostream& target)
     {
         target << "P3\n" << img.GetWidth() << ' ' << img.GetHeight() << "\n255\n";
         for (auto row:img.image)

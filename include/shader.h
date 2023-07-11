@@ -95,6 +95,48 @@ namespace mistery_render
     }
 
 
+    template <class Color, class real_t = double>
+    inline void TextureTriangleDraw(const Vertex<real_t>& vertex0, const Vertex<real_t>& vertex1, const Vertex<real_t>& vertex2, ZBuffer &zbuffer, Image<Color> &img)
+    {
+        auto v0 = vertex0.position;
+        auto v1 = vertex1.position;
+        auto v2 = vertex2.position;
+        std::array<std::array<real_t, 4>, 3> points = std::array<std::array<real_t, 4>, 3> ({(v0), (v1), (v2)});
+
+        m_math::Vector<real_t, 2> img_size({(real_t)img.GetWidth() - 1, (real_t)img.GetHeight() - 1});
+        m_math::Vector<real_t, 2> bbox_min({ std::numeric_limits<real_t>::max(),  std::numeric_limits<real_t>::max()});
+        m_math::Vector<real_t, 2> bbox_max({-std::numeric_limits<real_t>::max(), -std::numeric_limits<real_t>::max()});
+
+        for (size_t i=0; i<3; i++) 
+        {
+            for (size_t j=0; j<2; j++) 
+            {
+                bbox_min[j] = std::max(0.0, std::min(bbox_min[j], points[i][j]));
+                bbox_max[j] = std::min(img_size[j], std::max(bbox_max[j], points[i][j]));
+            }
+        }
+
+        for (real_t x = bbox_min[0]; x <= bbox_max[0]; ++x) 
+        {
+            for (real_t y = bbox_min[1]; y <= bbox_max[1]; ++y) 
+            {
+                m_math::Vector<real_t, 3> bc = Barycentric(points, m_math::Vector<real_t, 3>({x, y, 0}));
+                if (bc[0] >= 0 && bc[1] >= 0 && bc[2] >= 0) 
+                {
+                    real_t z = points[0][2] * bc[0] + points[1][2] * bc[1] + points[2][2] * bc[2];
+                    if (zbuffer.GetColor(static_cast<int>(x), static_cast<int>(y)) < (z + m_math::kDoubleAsZero)) 
+                    {
+                        double u_tmp = vertex0.texcoord[0] * bc[0] + vertex1.texcoord[0] * bc[1] + vertex2.texcoord[0] * bc[2];
+                        double v_tmp = vertex0.texcoord[1] * bc[0] + vertex1.texcoord[1] * bc[1] + vertex2.texcoord[1] * bc[2];
+                        m_math::Vector<real_t, 4> color_uv = texture::Lerp2(vertex0.material->diffuse_tex, u_tmp, v_tmp);
+                        zbuffer.SetColor(static_cast<int>(x), static_cast<int>(y), z);
+                        img.SetColor(static_cast<int>(x), static_cast<int>(y), Color(color_uv));
+                    }
+                }
+            }
+        }
+    }
+
     template <class real_t, class color_t>
     class Shader
     {
@@ -122,6 +164,27 @@ namespace mistery_render
             for (size_t i = 0; i < vertex_buffer.size(); i++)
             {
                 shader_vertex_buffer[i] = vertex_buffer[i];
+            }
+        }
+
+        void VertexBfferSRT()
+        {
+            for (size_t i = 0; i < this->shader_vertex_buffer.size(); i++)
+            {
+                if (this->shader_vertex_buffer[i].transform != nullptr)
+                {
+                    Transform trans_tmp = *(this->shader_vertex_buffer[i].transform);
+                    trans_tmp.trans -= this->camera_transform.trans;
+                    trans_tmp.rot -= this->camera_transform.rot;
+                    trans_tmp.scal = trans_tmp.scal.HadamardProduct(this->camera_transform.scal);
+
+                    m_math::Vector<real_t, 4> pos({ this->shader_vertex_buffer[i].position[0], 
+                                                    this->shader_vertex_buffer[i].position[1], 
+                                                    this->shader_vertex_buffer[i].position[2], 
+                                                    this->shader_vertex_buffer[i].position[3] });
+                    pos = trans_tmp.MartrixSRT() * pos;
+                    this->shader_vertex_buffer[i].position = {pos[0], pos[1], pos[2], pos[3]};
+                }
             }
         }
 
@@ -177,27 +240,6 @@ namespace mistery_render
         {
             this->img = img_ptr;
             zbuffer = MakeZBuffer(* (this->img));
-        }
-
-        void VertexBfferSRT()
-        {
-            for (size_t i = 0; i < this->shader_vertex_buffer.size(); i++)
-            {
-                if (this->shader_vertex_buffer[i].transform != nullptr)
-                {
-                    Transform trans_tmp = *(this->shader_vertex_buffer[i].transform);
-                    trans_tmp.trans -= this->camera_transform.trans;
-                    trans_tmp.rot -= this->camera_transform.rot;
-                    trans_tmp.scal = trans_tmp.scal.HadamardProduct(this->camera_transform.scal);
-
-                    m_math::Vector<real_t, 4> pos({ this->shader_vertex_buffer[i].position[0], 
-                                                    this->shader_vertex_buffer[i].position[1], 
-                                                    this->shader_vertex_buffer[i].position[2], 
-                                                    this->shader_vertex_buffer[i].position[3] });
-                    pos = trans_tmp.MartrixSRT() * pos;
-                    this->shader_vertex_buffer[i].position = {pos[0], pos[1], pos[2], pos[3]};
-                }
-            }
         }
 
         size_t TriangleFragmentShade(const color_t& color_frag, size_t idx)
@@ -257,5 +299,46 @@ namespace mistery_render
     };
 
 
+    template <class real_t, class color_t>
+    class TextureShader : public Shader<real_t, color_t>
+    {
+    public:
+        ZBuffer zbuffer = ZBuffer(1,1);
+
+        TextureShader()
+        {
+
+        }
+        ~TextureShader(){}
+
+        virtual void SetImgPtr(Image<color_t> * img_ptr) override
+        {
+            this->img = img_ptr;
+            zbuffer = MakeZBuffer(* (this->img));
+        }
+
+        size_t TextureTriangleFragmentShade(size_t idx)
+        {
+            TextureTriangleDraw<color_t, real_t>(this->shader_vertex_buffer[idx], this->shader_vertex_buffer[idx + 1], 
+                                                    this->shader_vertex_buffer[idx + 2], zbuffer, *(this->img));
+            return idx + 3;
+        }
+
+        virtual bool VertexShade() override
+        {
+            this->VertexBfferSRT();
+            return true;
+        }
+
+        virtual bool FragmentShade() override
+        {
+            for (size_t i = 0; i < this->shader_vertex_buffer.size(); i += 3) 
+            {
+                this->TextureTriangleFragmentShade(i);
+            }
+            return true;
+        }
+
+    };
 
 }

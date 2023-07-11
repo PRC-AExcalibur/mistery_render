@@ -30,8 +30,12 @@ namespace m_math
          * @brief constructor by elems
          * @param elems: elements of this vector
          */
-        Vector(const std::array<std::array<T, 1>, dim> &elem) : Matrix<T, dim, 1>(elem)
+        Vector(const std::array<T, dim> &elem)
         {
+            for (size_t i = 0; i < dim; i++)
+            {
+                this->elements[i][0] = elem[i];
+            }
         };
 
         /**

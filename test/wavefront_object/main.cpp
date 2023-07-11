@@ -33,7 +33,7 @@ void test_obj()
 
 }
 
-template<class shader_t>
+template<class shader_t, class color_t>
 void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
 {
     double ts = NowTime(1);
@@ -83,7 +83,7 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
 
     ts = NowTime(1);
     // std::shared_ptr<shader_t> shader(new shader_t());
-    Image<ColorRGB_d> res_img(800, 600);
+    Image<color_t> res_img(800, 600);
 
     Camera cma0;
     cma0.transform_origin.scal = m_math::Vector3d({1,1,1});
@@ -108,14 +108,17 @@ int main(int argc, char *argv[])
     // test_obj();
 
     // std::shared_ptr<PrintShader<double, ColorRGB_d>> print_shader(new PrintShader<double, ColorRGB_d>());
-    // test_scene<PrintShader<double, ColorRGB_d>>(print_shader, "../model/cubic/cubic.obj");
+    // test_scene<PrintShader<double, ColorRGB_d>, ColorRGB_d>(print_shader, "../model/cubic/cubic.obj");
 
     // std::shared_ptr<FlatShader<double, ColorRGB_d>> flat_shader(new FlatShader<double, ColorRGB_d>(ColorRGB_d(1,1,1)));
-    // test_scene<FlatShader<double, ColorRGB_d>>(flat_shader, "../model/cubic/cubic.obj");
+    // test_scene<FlatShader<double, ColorRGB_d>, ColorRGB_d>(flat_shader, "../model/cubic/cubic.obj");
 
     // std::shared_ptr<RandomFlatShader<double, ColorRGB_d>> flat_shader(new RandomFlatShader<double, ColorRGB_d>(ColorRGB_d(1,1,1)));
-    // test_scene<RandomFlatShader<double, ColorRGB_d>>(flat_shader, "../model/cubic/cubic.obj");
+    // test_scene<RandomFlatShader<double, ColorRGB_d>, ColorRGB_d>(flat_shader, "../model/cubic/cubic.obj");
 
-    std::shared_ptr<RandomFlatShader<double, ColorRGB_d>> flat_shader(new RandomFlatShader<double, ColorRGB_d>(ColorRGB_d(1,1,1)));
-    test_scene<RandomFlatShader<double, ColorRGB_d>>(flat_shader, "../model/keqing/keqing_from_fbx.obj");
+    // std::shared_ptr<RandomFlatShader<double, ColorRGB_d>> flat_shader(new RandomFlatShader<double, ColorRGB_d>(ColorRGB_d(1,1,1)));
+    // test_scene<RandomFlatShader<double, ColorRGB_d>, ColorRGB_d>(flat_shader, "../model/keqing/keqing_from_fbx.obj");
+
+    std::shared_ptr<TextureShader<double, ColorRGBA_d>> tex_shader(new TextureShader<double, ColorRGBA_d>());
+    test_scene<TextureShader<double, ColorRGBA_d>, ColorRGBA_d>(tex_shader, "../model/keqing/keqing_from_fbx.obj");
 }

@@ -20,6 +20,7 @@ std::vector<std::vector<std::array<real_t, 4>>> ParseTextureTGA(std::string tex_
         std::cerr << "Error reading TGA file: " << tex_name << std::endl;
         return {{}};
     }
+    tga.flip_vertically();
 
     std::vector<std::vector<std::array<real_t, 4>>> texture(tga.height(), std::vector<std::array<real_t, 4>>(tga.width()));
     for (int y = 0; y < tga.height(); ++y)
