@@ -96,7 +96,7 @@ namespace mistery_render
 
 
     template <class Color, class real_t = double>
-    inline void TextureTriangleDraw(const Vertex<real_t>& vertex0, const Vertex<real_t>& vertex1, const Vertex<real_t>& vertex2, ZBuffer &zbuffer, Image<Color> &img)
+    inline void TextureTriangleDraw(const Vertex<real_t>& vertex0, const Vertex<real_t>& vertex1, const Vertex<real_t>& vertex2, ZBuffer &zbuffer, Image<Color> &img, int cut_n = 1)
     {
         auto v0 = vertex0.position;
         auto v1 = vertex1.position;
@@ -116,22 +116,46 @@ namespace mistery_render
             }
         }
 
-        for (real_t x = bbox_min[0]; x <= bbox_max[0]; ++x) 
+        double cut_step = 1.0/cut_n;
+        for (real_t x_pixel = bbox_min[0]; x_pixel <= bbox_max[0]; ++ x_pixel) 
         {
-            for (real_t y = bbox_min[1]; y <= bbox_max[1]; ++y) 
+            for (real_t y_pixel = bbox_min[1]; y_pixel <= bbox_max[1]; ++ y_pixel) 
             {
-                m_math::Vector<real_t, 3> bc = Barycentric(points, m_math::Vector<real_t, 3>({x, y, 0}));
-                if (bc[0] >= 0 && bc[1] >= 0 && bc[2] >= 0) 
+                real_t depth = zbuffer.GetColor(static_cast<int>(x_pixel), static_cast<int>(y_pixel));
+                int sample_num = 0;
+                m_math::Vector<real_t, 4> color_sample_sum = m_math::Vector<real_t, 4>();
+                real_t depth_sample_max = depth;
+
+                for (int i_x = 0; i_x < cut_n; i_x++)
                 {
-                    real_t z = points[0][2] * bc[0] + points[1][2] * bc[1] + points[2][2] * bc[2];
-                    if (zbuffer.GetColor(static_cast<int>(x), static_cast<int>(y)) < (z + m_math::kDoubleAsZero)) 
+                    real_t x = x_pixel + i_x * cut_step;
+                    
+                    for (int i_y = 0; i_y < cut_n; i_y++)
                     {
-                        double u_tmp = vertex0.texcoord[0] * bc[0] + vertex1.texcoord[0] * bc[1] + vertex2.texcoord[0] * bc[2];
-                        double v_tmp = vertex0.texcoord[1] * bc[0] + vertex1.texcoord[1] * bc[1] + vertex2.texcoord[1] * bc[2];
-                        m_math::Vector<real_t, 4> color_uv = texture::Lerp2(vertex0.material->diffuse_tex, u_tmp, v_tmp);
-                        zbuffer.SetColor(static_cast<int>(x), static_cast<int>(y), z);
-                        img.SetColor(static_cast<int>(x), static_cast<int>(y), Color(color_uv));
+                        real_t y = y_pixel + i_y * cut_step;
+                        {
+                            m_math::Vector<real_t, 3> bc = Barycentric(points, m_math::Vector<real_t, 3>({x, y, 0}));
+                            if (bc[0] >= 0 && bc[1] >= 0 && bc[2] >= 0) 
+                            {
+                                real_t z = points[0][2] * bc[0] + points[1][2] * bc[1] + points[2][2] * bc[2];
+                                if (depth < z) 
+                                {
+                                    double u_tmp = vertex0.texcoord[0] * bc[0] + vertex1.texcoord[0] * bc[1] + vertex2.texcoord[0] * bc[2];
+                                    double v_tmp = vertex0.texcoord[1] * bc[0] + vertex1.texcoord[1] * bc[1] + vertex2.texcoord[1] * bc[2];
+                                    m_math::Vector<real_t, 4> color_uv = texture::Lerp2(vertex0.material->diffuse_tex, u_tmp, v_tmp);
+                                    color_sample_sum += color_uv;
+                                    depth_sample_max = std::max(z, depth_sample_max);
+                                    sample_num++;
+                                }
+                            }
+                        }
                     }
+                }
+                
+                if (sample_num>0)
+                {
+                    zbuffer.SetColor(static_cast<int>(x_pixel), static_cast<int>(y_pixel), depth_sample_max);
+                    img.SetColor(static_cast<int>(x_pixel), static_cast<int>(y_pixel), Color(color_sample_sum / sample_num));
                 }
             }
         }
@@ -145,12 +169,15 @@ namespace mistery_render
         Transform camera_transform;
         std::vector<Vertex<real_t>> shader_vertex_buffer = {};
 
+        ZBuffer zbuffer = ZBuffer(1,1);
+
     public:
         virtual ~Shader() {};
 
         virtual void SetImgPtr(Image<color_t> * img_ptr)
         {
             img = img_ptr;
+            zbuffer = MakeZBuffer(* (this->img));
         }
 
         void UpdateCameraTransform(const Transform & trans)
@@ -228,19 +255,12 @@ namespace mistery_render
 
     public:
         color_t color;
-        ZBuffer zbuffer = ZBuffer(1,1);
         
         FlatShader(color_t color_init)
         {
             color = color_init;
         }
         ~FlatShader(){}
-
-        virtual void SetImgPtr(Image<color_t> * img_ptr) override
-        {
-            this->img = img_ptr;
-            zbuffer = MakeZBuffer(* (this->img));
-        }
 
         size_t TriangleFragmentShade(const color_t& color_frag, size_t idx)
         {
@@ -249,7 +269,7 @@ namespace mistery_render
             auto v2 = this->shader_vertex_buffer[idx + 2].position;
             std::array<std::array<real_t, 4>, 3> points = std::array<std::array<real_t, 4>, 3> ({(v0), (v1), (v2)});
 
-            TriangleDraw<std::array<std::array<real_t, 4>, 3>, color_t, real_t>(points, zbuffer, *(this->img), color_frag);
+            TriangleDraw<std::array<std::array<real_t, 4>, 3>, color_t, real_t>(points, this->zbuffer, *(this->img), color_frag);
             return idx + 3;
         }
 
@@ -303,24 +323,17 @@ namespace mistery_render
     class TextureShader : public Shader<real_t, color_t>
     {
     public:
-        ZBuffer zbuffer = ZBuffer(1,1);
-
-        TextureShader()
+        int ssaa_scale = 1;
+        TextureShader(int ssaa_scale_init = 1) : ssaa_scale(ssaa_scale_init)
         {
 
         }
         ~TextureShader(){}
 
-        virtual void SetImgPtr(Image<color_t> * img_ptr) override
-        {
-            this->img = img_ptr;
-            zbuffer = MakeZBuffer(* (this->img));
-        }
-
         size_t TextureTriangleFragmentShade(size_t idx)
         {
             TextureTriangleDraw<color_t, real_t>(this->shader_vertex_buffer[idx], this->shader_vertex_buffer[idx + 1], 
-                                                    this->shader_vertex_buffer[idx + 2], zbuffer, *(this->img));
+                                                    this->shader_vertex_buffer[idx + 2], this->zbuffer, *(this->img), ssaa_scale);
             return idx + 3;
         }
 

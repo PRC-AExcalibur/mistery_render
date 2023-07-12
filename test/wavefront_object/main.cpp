@@ -74,16 +74,17 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
     // scene_test.meshes[0].transform_origin.rot = m_math::Vector3d({1.57,1.57,0})*0.5;
     // scene_test.meshes[0].transform_origin.scal = m_math::Vector3d({75,50,50});
 
-    scene_test.meshes[0].transform_origin.trans = m_math::Vector3d({400,550,0});
+    scene_test.meshes[0].transform_origin.trans = m_math::Vector3d({400,880,0});
     scene_test.meshes[0].transform_origin.rot = m_math::Vector3d({0,0,3.14});
-    scene_test.meshes[0].transform_origin.scal = m_math::Vector3d({1,1,1})*300;
+    scene_test.meshes[0].transform_origin.scal = m_math::Vector3d({1,1,1})*500;
 
     te = NowTime(1);
     std::cout << "make scene success: using "<<te-ts<<" ms\n";
 
     ts = NowTime(1);
     // std::shared_ptr<shader_t> shader(new shader_t());
-    Image<color_t> res_img(800, 600);
+    // Image<color_t> res_img(800, 600);
+    Image<color_t> res_img(800, 900);
 
     Camera cma0;
     cma0.transform_origin.scal = m_math::Vector3d({1,1,1});
@@ -119,6 +120,6 @@ int main(int argc, char *argv[])
     // std::shared_ptr<RandomFlatShader<double, ColorRGB_d>> flat_shader(new RandomFlatShader<double, ColorRGB_d>(ColorRGB_d(1,1,1)));
     // test_scene<RandomFlatShader<double, ColorRGB_d>, ColorRGB_d>(flat_shader, "../model/keqing/keqing_from_fbx.obj");
 
-    std::shared_ptr<TextureShader<double, ColorRGBA_d>> tex_shader(new TextureShader<double, ColorRGBA_d>());
+    std::shared_ptr<TextureShader<double, ColorRGBA_d>> tex_shader(new TextureShader<double, ColorRGBA_d>(4));
     test_scene<TextureShader<double, ColorRGBA_d>, ColorRGBA_d>(tex_shader, "../model/keqing/keqing_from_fbx.obj");
 }
