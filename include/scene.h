@@ -42,26 +42,65 @@ public:
     }
 };
 
-
 class Light : public Actor
 {
-private:
+public:
+    m_math::Vector<double, 3> ambient = m_math::Vector<double, 3>({1,1,1});
+    m_math::Vector<double, 3> diffuse = m_math::Vector<double, 3>({1,1,1});
+    m_math::Vector<double, 3> specular = m_math::Vector<double, 3>({1,1,1});
 
+    Light(const m_math::Vector3d &ambi, const m_math::Vector3d &diff, const m_math::Vector3d &spec) : ambient(ambi), diffuse(diff), specular(spec)
+    {
+    }
 };
 
+class PointLight : public Light
+{
+public:
+    PointLight(const m_math::Vector3d &ambi, const m_math::Vector3d &diff, const m_math::Vector3d &spec) : Light(ambi, diff, spec)
+    {
+    }
+};
+
+class DirectionalLight : public Light
+{
+public:
+    m_math::Vector3d direction;
+
+    DirectionalLight(const m_math::Vector3d &ambi, const m_math::Vector3d &diff, const m_math::Vector3d &spec, 
+                const m_math::Vector3d &direction) : Light(ambi, diff, spec), direction(direction)
+    {
+    }
+};
 
 class Scene : public Actor
 {
 private:
 
 public:
-    std::vector<Mesh> meshes;
-    std::vector<Light> lights;
-    std::vector<Camera> cameras;
+    std::vector<Mesh *> meshes;
+    std::vector<Light *> lights;
+    std::vector<Camera *> cameras;
 
     Scene()
     {
 
+    }
+
+    ~Scene()
+    {
+        for (size_t i = 0; i < meshes.size(); i++)
+        {
+            delete meshes[i];
+        }
+        for (size_t i = 0; i < lights.size(); i++)
+        {
+            delete lights[i];
+        }
+        for (size_t i = 0; i < cameras.size(); i++)
+        {
+            delete cameras[i];
+        }
     }
 
 };
@@ -114,7 +153,7 @@ public:
     {
         for (size_t i = 0; i < scene.meshes.size(); i++)
         {
-            PushVertexBuffer(scene.meshes[i].GetVertexList(), &(scene.meshes[i].transform_origin));
+            PushVertexBuffer(scene.meshes[i]->GetVertexList(), &(scene.meshes[i]->transform_origin));
         }
     }
 

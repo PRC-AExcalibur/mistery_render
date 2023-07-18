@@ -65,7 +65,7 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
     }
 
     Scene scene_test = Scene();
-    scene_test.meshes.emplace_back(vert_buf);
+    scene_test.meshes.emplace_back(new Mesh(vert_buf));
 
     TestExpect(scene_test.meshes.size(), (size_t)1, "meshes size");
 
@@ -74,9 +74,9 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
     // scene_test.meshes[0].transform_origin.rot = m_math::Vector3d({1.57,1.57,0})*0.5;
     // scene_test.meshes[0].transform_origin.scal = m_math::Vector3d({75,50,50});
 
-    scene_test.meshes[0].transform_origin.trans = m_math::Vector3d({400,880,0});
-    scene_test.meshes[0].transform_origin.rot = m_math::Vector3d({0,0,3.14});
-    scene_test.meshes[0].transform_origin.scal = m_math::Vector3d({1,1,1})*500;
+    scene_test.meshes[0]->transform_origin.trans = m_math::Vector3d({400,880,0});
+    scene_test.meshes[0]->transform_origin.rot = m_math::Vector3d({0,0,3.14});
+    scene_test.meshes[0]->transform_origin.scal = m_math::Vector3d({1,1,1})*500;
 
     te = NowTime(1);
     std::cout << "make scene success: using "<<te-ts<<" ms\n";
@@ -94,6 +94,7 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
     cma.UpdateVertexBufferFromScene(scene_test);
     cma.Render();
 
+    te = NowTime(1);
     std::cout << "render success: using "<<te-ts<<" ms\n";
 
     std::ofstream file_render("output/test/render_test.ppm");

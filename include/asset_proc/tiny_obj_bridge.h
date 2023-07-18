@@ -18,7 +18,7 @@ std::vector<std::vector<std::array<real_t, 4>>> ParseTextureTGA(std::string tex_
     if (!tga.read_tga_file(tex_name))
     {
         std::cerr << "Error reading TGA file: " << tex_name << std::endl;
-        return {{}};
+        return {};
     }
     tga.flip_vertically();
 
@@ -38,6 +38,7 @@ std::vector<std::vector<std::array<real_t, 4>>> ParseTextureTGA(std::string tex_
 template <class real_t, size_t tex_n>
 std::vector<std::vector<std::array<real_t, 4>>> * LoadTexture(std::string tex_name, std::shared_ptr<TexturePool<real_t, tex_n>> texture_pool)
 {
+    // double ts = NowTime(1);
     if (tex_name.size()==0)
     {
         return nullptr;
@@ -54,8 +55,15 @@ std::vector<std::vector<std::array<real_t, 4>>> * LoadTexture(std::string tex_na
     {
         if (texture_pool->GetTexture(tex_name) == nullptr)
         {
+            auto tex_tmp = ParseTextureTGA<real_t>(tex_name);
+            if (tex_tmp.size() == 0)
+            {
+                // std::cout << "null tex\n";
+                return nullptr;
+            }
             texture_pool->InsertTexture(tex_name, ParseTextureTGA<real_t>(tex_name));
         }
+        // std::cout << "load tex " + tex_name + ": using "<<NowTime(1)-ts<<" ms\n";
         return texture_pool->GetTexture(tex_name);
     }
 
@@ -202,9 +210,12 @@ inline std::string load_obj(const std::string &obj_path,
             const std::vector<tinyobj::material_t> mats = obj_reader->GetMaterials();
             size_t last_slash_idx = obj_path.find_last_of('/');
             std::string mats_path = (last_slash_idx == std::string::npos) ? "" : obj_path.substr(0, last_slash_idx+1);
+            material_list->reserve(mats.size());
             for (size_t i = 0; i < mats.size(); i++)
             {
+                // double ts = NowTime(1);
                 material_list->push_back(MatObjToMaterial<double>(mats[i], texture_pool, mats_path));
+                // std::cout << "load tex " + mats[i].name + ": using "<<NowTime(1)-ts<<" ms\n";
             }
             for (size_t i = 0; i < obj_reader->GetShapes().size(); i++)
             {
