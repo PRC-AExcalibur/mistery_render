@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include "base_data_struct.h"
-#include "shader.h"
 
 namespace mistery_render
 {
@@ -52,6 +51,11 @@ public:
     Light(const m_math::Vector3d &ambi, const m_math::Vector3d &diff, const m_math::Vector3d &spec) : ambient(ambi), diffuse(diff), specular(spec)
     {
     }
+    virtual ~Light()
+    {
+    }
+
+    virtual m_math::Vector<double, 3> GetDirection(const m_math::Vector<double, 3> position) const = 0;
 };
 
 class PointLight : public Light
@@ -59,6 +63,13 @@ class PointLight : public Light
 public:
     PointLight(const m_math::Vector3d &ambi, const m_math::Vector3d &diff, const m_math::Vector3d &spec) : Light(ambi, diff, spec)
     {
+    }
+    virtual ~PointLight()
+    {
+    }
+    virtual m_math::Vector<double, 3> GetDirection(const m_math::Vector<double, 3> position) const override
+    {
+        return m_math::Vector<double, 3>(this->transform_origin.trans - position);
     }
 };
 
@@ -70,6 +81,13 @@ public:
     DirectionalLight(const m_math::Vector3d &ambi, const m_math::Vector3d &diff, const m_math::Vector3d &spec, 
                 const m_math::Vector3d &direction) : Light(ambi, diff, spec), direction(direction)
     {
+    }
+    virtual ~DirectionalLight()
+    {
+    }
+    virtual m_math::Vector<double, 3> GetDirection(const m_math::Vector<double, 3> position) const override
+    {
+        return direction;
     }
 };
 
@@ -103,72 +121,6 @@ public:
         }
     }
 
-};
-
-template <class color_t>
-class CameraRender
-{
-    friend Shader<double, color_t>;
-private:
-    std::shared_ptr<Shader<double, color_t>> shader = nullptr;
-    std::vector<Vertex<double>> vert_buf;
-
-public:
-    Image<color_t> * img;
-    Camera * camera;
-
-    CameraRender(Image<color_t> * img_ptr, Camera * cma)
-    {
-        vert_buf.reserve(100000);
-        img = img_ptr;
-        camera = cma;
-    }
-
-    void SetShader(std::shared_ptr<Shader<double, color_t>> shader_ptr)
-    {
-        shader = shader_ptr;
-        shader->SetImgPtr(img);
-    }
-
-    void ClearVertexBuffer()
-    {
-        vert_buf.clear();
-    }
-
-    void PushVertexBuffer(const std::vector<Vertex<double>> &vert_list, Transform * trans)
-    {
-        for (size_t i = 0; i < vert_list.size(); i++)
-        {
-            Vertex<double> vert_tmp = vert_list[i];
-            vert_tmp.transform = trans;
-            vert_buf.emplace_back(vert_tmp);
-        }
-    }
-    void PushVertexBuffer(const Vertex<double> &vert)
-    {
-        vert_buf.emplace_back(vert);
-    }
-
-    void UpdateVertexBufferFromScene(Scene & scene)
-    {
-        for (size_t i = 0; i < scene.meshes.size(); i++)
-        {
-            PushVertexBuffer(scene.meshes[i]->GetVertexList(), &(scene.meshes[i]->transform_origin));
-        }
-    }
-
-    void Render()
-    {
-        if (camera == nullptr)
-        {
-            return;
-        }
-        
-        shader->UpdateCameraTransform(camera->transform_origin);
-        shader->BindVertexBuffer(vert_buf);
-        shader->VertexShade();
-        shader->FragmentShade();
-    }
 };
 
 }

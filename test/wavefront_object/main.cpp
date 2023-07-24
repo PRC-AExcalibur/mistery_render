@@ -78,6 +78,14 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
     scene_test.meshes[0]->transform_origin.rot = m_math::Vector3d({0,0,3.14});
     scene_test.meshes[0]->transform_origin.scal = m_math::Vector3d({1,1,1})*500;
 
+    PointLight * point_light_test= new PointLight(m_math::Vector3d({0.65,0.65,0.65}), m_math::Vector3d({0.65,0.65,0.65}), m_math::Vector3d({0.65,0.65,0.65}));
+    point_light_test -> transform_origin.trans = m_math::Vector3d({-200,-200,-200});
+    scene_test.lights.emplace_back(point_light_test);
+    
+    // PointLight * point_light_test2= new PointLight(m_math::Vector3d({0,0,1}), m_math::Vector3d({0,0,1}), m_math::Vector3d({0,0,1}));
+    // point_light_test2 -> transform_origin.trans = m_math::Vector3d({100,100,0});
+    // scene_test.lights.emplace_back(point_light_test2);
+
     te = NowTime(1);
     std::cout << "make scene success: using "<<te-ts<<" ms\n";
 
@@ -91,7 +99,7 @@ void test_scene(std::shared_ptr<shader_t> shader, const std::string& path)
 
     CameraRender cma(&res_img, &cma0);
     cma.SetShader(shader);
-    cma.UpdateVertexBufferFromScene(scene_test);
+    cma.UpdateFromScene(scene_test);
     cma.Render();
 
     te = NowTime(1);
@@ -121,6 +129,9 @@ int main(int argc, char *argv[])
     // std::shared_ptr<RandomFlatShader<double, ColorRGB_d>> flat_shader(new RandomFlatShader<double, ColorRGB_d>(ColorRGB_d(1,1,1)));
     // test_scene<RandomFlatShader<double, ColorRGB_d>, ColorRGB_d>(flat_shader, "../model/keqing/keqing_from_fbx.obj");
 
-    std::shared_ptr<TextureShader<double, ColorRGBA_d>> tex_shader(new TextureShader<double, ColorRGBA_d>(4));
-    test_scene<TextureShader<double, ColorRGBA_d>, ColorRGBA_d>(tex_shader, "../model/keqing/keqing_from_fbx.obj");
+    // std::shared_ptr<TextureShader<double, ColorRGBA_d>> tex_shader(new TextureShader<double, ColorRGBA_d>(4));
+    // test_scene<TextureShader<double, ColorRGBA_d>, ColorRGBA_d>(tex_shader, "../model/keqing/keqing_from_fbx.obj");
+
+    std::shared_ptr<BlinnPhongShader<double, ColorRGBA_d>> bphong_shader(new BlinnPhongShader<double, ColorRGBA_d>(4));
+    test_scene<BlinnPhongShader<double, ColorRGBA_d>, ColorRGBA_d>(bphong_shader, "../model/keqing/keqing_from_fbx.obj");
 }

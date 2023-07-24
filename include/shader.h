@@ -2,6 +2,7 @@
 
 #include "image.h"
 #include "texture.h"
+#include "scene.h"
 #include <random>
 
 namespace mistery_render
@@ -94,11 +95,10 @@ namespace mistery_render
         }
     }
 
-    class Light;
 
     template <class Color, typename FShader, class real_t = double>
     inline void TriangleDrawFrame(const Vertex<real_t>& vertex0, const Vertex<real_t>& vertex1, const Vertex<real_t>& vertex2, 
-                    ZBuffer &zbuffer, const std::vector<Light *> &lights, Image<Color> &img, int cut_n = 1)
+                    ZBuffer &zbuffer, Image<Color> &img, const FShader &light_functor, int cut_n = 1)
     {
         auto v0 = vertex0.position;
         auto v1 = vertex1.position;
@@ -142,7 +142,7 @@ namespace mistery_render
                                 real_t z = points[0][2] * bc[0] + points[1][2] * bc[1] + points[2][2] * bc[2];
                                 if (depth < z) 
                                 {
-                                    m_math::Vector<real_t, 4> color_uv = FShader::GetColor(vertex0, vertex1, vertex2, bc, lights);
+                                    m_math::Vector<real_t, 4> color_uv = light_functor.GetColor(vertex0, vertex1, vertex2, bc);
 
                                     color_sample_sum += color_uv;
                                     depth_sample_max = std::max(z, depth_sample_max);
@@ -165,8 +165,8 @@ namespace mistery_render
     template <class real_t>
     struct GetTextureColor
     {
-        static m_math::Vector<real_t, 4> GetColor(const Vertex<real_t> &vertex0, const Vertex<real_t> &vertex1, const Vertex<real_t> &vertex2,
-                                            const m_math::Vector<real_t, 3> &bc, const std::vector<Light *> &lights)
+        m_math::Vector<real_t, 4> GetColor(const Vertex<real_t> &vertex0, const Vertex<real_t> &vertex1, const Vertex<real_t> &vertex2,
+                                            const m_math::Vector<real_t, 3> &bc) const
         {
             double u_tmp = vertex0.texcoord[0] * bc[0] + vertex1.texcoord[0] * bc[1] + vertex2.texcoord[0] * bc[2];
             double v_tmp = vertex0.texcoord[1] * bc[0] + vertex1.texcoord[1] * bc[1] + vertex2.texcoord[1] * bc[2];
@@ -178,57 +178,64 @@ namespace mistery_render
         }
     };
 
-    // template <class real_t>
-    // struct GetPhongColor
-    // {
-    //     static m_math::Vector<real_t, 4> GetColor(const Vertex<real_t> &vertex0, const Vertex<real_t> &vertex1, const Vertex<real_t> &vertex2,
-    //                                         const m_math::Vector<real_t, 3> &bc, const std::vector<Light *> &lights)
-    //     {
-    //         double u_tmp = vertex0.texcoord[0] * bc[0] + vertex1.texcoord[0] * bc[1] + vertex2.texcoord[0] * bc[2];
-    //         double v_tmp = vertex0.texcoord[1] * bc[0] + vertex1.texcoord[1] * bc[1] + vertex2.texcoord[1] * bc[2];
+    template <class real_t>
+    struct GetPhongColor
+    {
+        std::vector<Light *> lights;
+        m_math::Vector<real_t, 3> pos_v0;
+        m_math::Vector<real_t, 3> pos_v1;
+        m_math::Vector<real_t, 3> pos_v2;
 
-    //         m_math::Vector<real_t, 3> diffuse_color = m_math::Vector<real_t, 3>(vertex0.material->diffuse);
-    //         m_math::Vector<real_t, 3> specular_color = m_math::Vector<real_t, 3>(vertex0.material->specular);
-    //         if (vertex0.material->diffuse_tex != nullptr)
-    //         {
-    //             diffuse_color = texture::Lerp2(vertex0.material->diffuse_tex, u_tmp, v_tmp);
-    //         }
-    //         if (vertex0.material->specular_tex != nullptr)
-    //         {
-    //             specular_color = texture::Lerp2(vertex0.material->specular_tex, u_tmp, v_tmp);
-    //         }
+        m_math::Vector<real_t, 4> GetColor(const Vertex<real_t> &vertex0, const Vertex<real_t> &vertex1, const Vertex<real_t> &vertex2,
+                                            const m_math::Vector<real_t, 3> &bc) const
+        {
+            double u_tmp = vertex0.texcoord[0] * bc[0] + vertex1.texcoord[0] * bc[1] + vertex2.texcoord[0] * bc[2];
+            double v_tmp = vertex0.texcoord[1] * bc[0] + vertex1.texcoord[1] * bc[1] + vertex2.texcoord[1] * bc[2];
 
-    //         m_math::Vector<real_t, 3> position = bc[0] * m_math::Vector<real_t, 3>(vertex0.position) 
-    //                                         + bc[1] * m_math::Vector<real_t, 3>(vertex1.position) 
-    //                                         + bc[2] * m_math::Vector<real_t, 3>(vertex2.position);
+            m_math::Vector<real_t, 3> diffuse_color = m_math::Vector<real_t, 3>(vertex0.material->diffuse);
+            m_math::Vector<real_t, 3> specular_color = m_math::Vector<real_t, 3>(vertex0.material->specular);
+            if (vertex0.material->diffuse_tex != nullptr)
+            {
+                m_math::Vector<real_t, 4> col_tmp = texture::Lerp2(vertex0.material->diffuse_tex, u_tmp, v_tmp);
+                diffuse_color = m_math::Vector<real_t, 3>({col_tmp[0], col_tmp[1], col_tmp[2]});
+            }
+            if (vertex0.material->specular_tex != nullptr)
+            {
+                m_math::Vector<real_t, 4> col_tmp = texture::Lerp2(vertex0.material->specular_tex, u_tmp, v_tmp);
+                specular_color = m_math::Vector<real_t, 3>({col_tmp[0], col_tmp[1], col_tmp[2]});
+            }
 
-    //         m_math::Vector<real_t, 3> normal = bc[0] * m_math::Vector<real_t, 3>(vertex0.normal) 
-    //                                         + bc[1] * m_math::Vector<real_t, 3>(vertex1.normal) 
-    //                                         + bc[2] * m_math::Vector<real_t, 3>(vertex2.normal);
+            m_math::Vector<real_t, 3> position = bc[0] * m_math::Vector<real_t, 3>({vertex0.position[0], vertex0.position[1], vertex0.position[2]}) 
+                                            + bc[1] * m_math::Vector<real_t, 3>({vertex1.position[0], vertex1.position[1], vertex1.position[2]}) 
+                                            + bc[2] * m_math::Vector<real_t, 3>({vertex2.position[0], vertex2.position[1], vertex2.position[2]});
 
-    //         m_math::Vector<real_t, 3> res_tmp = m_math::Vector<real_t, 3>();
+            m_math::Vector<real_t, 3> normal = bc[0] * m_math::Vector<real_t, 3>({vertex0.normal[0], vertex0.normal[1], vertex0.normal[2]}) 
+                                            + bc[1] * m_math::Vector<real_t, 3>({vertex1.normal[0], vertex1.normal[1], vertex1.normal[2]}) 
+                                            + bc[2] * m_math::Vector<real_t, 3>({vertex2.normal[0], vertex2.normal[1], vertex2.normal[2]});
+            normal.NormalizeInplace();
 
-    //         for (auto light_i:lights)
-    //         {
-    //             // 需要在缓冲区多传一个fragpos,即模型空间中的顶点坐标！！！！！！
+            m_math::Vector<real_t, 3> res_tmp = m_math::Vector<real_t, 3>();
 
-    //             // m_math::Vector<real_t, 3> lightDir = light_i->GetDirection();
-    //             // m_math::Vector<real_t, 3> viewDir    = normalize(FragPos);
-    //             // m_math::Vector<real_t, 3> halfwayDir = normalize(lightDir + viewDir);
+            for (auto light_i:lights)
+            {
+                m_math::Vector<real_t, 3> frag_pos = bc[0] * pos_v0 + bc[1] * pos_v1 + bc[2] * pos_v2;
+                m_math::Vector<real_t, 3> light_dir = light_i->GetDirection(frag_pos).Normalize();
+                m_math::Vector<real_t, 3> view_dir = frag_pos.Normalize();
+                m_math::Vector<real_t, 3> half_way_dir = m_math::Vector<real_t, 3>(light_dir + view_dir).Normalize();
 
-    //             double diff = std::max(lightDir * normal, 0.0);
-    //             double spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+                double diff = std::max(light_dir * normal, 0.0);
+                double spec = std::pow(std::max(normal * half_way_dir, 0.0), vertex0.material->shininess);
 
-    //             m_math::Vector<real_t, 3> ambient =  diffuse_color.HadamardProduct(light_i->ambient);
-    //             m_math::Vector<real_t, 3> diffuse =  diff * diffuse_color.HadamardProduct(light_i->diffuse);
-    //             m_math::Vector<real_t, 3> specular =  spec * specular_color.HadamardProduct(light_i->specular);
+                m_math::Vector<real_t, 3> ambient =  diffuse_color.HadamardProduct(light_i->ambient);
+                m_math::Vector<real_t, 3> diffuse =  diff * diffuse_color.HadamardProduct(light_i->diffuse);
+                m_math::Vector<real_t, 3> specular =  spec * specular_color.HadamardProduct(light_i->specular);
 
-    //             res_tmp += ambient + diffuse + specular;
-    //         }
+                res_tmp += ambient + diffuse + specular;
+            }
 
-    //         return {res_tmp[0], res_tmp[1], res_tmp[2], 1};
-    //     }
-    // };
+            return m_math::Vector<real_t, 4>({res_tmp[0], res_tmp[1], res_tmp[2], 1});
+        }
+    };
 
 
 
@@ -240,6 +247,7 @@ namespace mistery_render
         Image<color_t> * img = nullptr;
         Transform camera_transform;
         std::vector<Vertex<real_t>> shader_vertex_buffer = {};
+        std::vector<Light *> shader_light_buffer = {};
 
         ZBuffer zbuffer = ZBuffer(1,1);
 
@@ -266,7 +274,12 @@ namespace mistery_render
             }
         }
 
-        void VertexBfferSRT()
+        void BindLightBuffer(const std::vector<Light *> light_buffer)
+        {
+            shader_light_buffer = light_buffer;
+        }
+
+        void VertexBufferSRT()
         {
             for (size_t i = 0; i < this->shader_vertex_buffer.size(); i++)
             {
@@ -283,6 +296,27 @@ namespace mistery_render
                                                     this->shader_vertex_buffer[i].position[3] });
                     pos = trans_tmp.MartrixSRT() * pos;
                     this->shader_vertex_buffer[i].position = {pos[0], pos[1], pos[2], pos[3]};
+                }
+            }
+        }
+
+        void NormalBufferSRT()
+        {
+            for (size_t i = 0; i < this->shader_vertex_buffer.size(); i++)
+            {
+                if (this->shader_vertex_buffer[i].transform != nullptr)
+                {
+                    Transform trans_tmp = *(this->shader_vertex_buffer[i].transform);
+
+                    m_math::Vector<real_t, 3> normal({ this->shader_vertex_buffer[i].normal[0], 
+                                                    this->shader_vertex_buffer[i].normal[1], 
+                                                    this->shader_vertex_buffer[i].normal[2]});
+                    auto mat4x4 = trans_tmp.MartrixSRT();
+                    m_math::Matrix<real_t, 3, 3> mat3x3 = m_math::Matrix<real_t, 3, 3>({mat4x4[0][0], mat4x4[1][0], mat4x4[2][0], 
+                                                                                    mat4x4[0][1], mat4x4[1][1], mat4x4[2][1], 
+                                                                                    mat4x4[0][2], mat4x4[1][2], mat4x4[2][2]});
+                    normal = m_math::InverseMatrix(mat3x3) * normal;
+                    this->shader_vertex_buffer[i].normal = {normal[0], normal[1], normal[2]};
                 }
             }
         }
@@ -348,7 +382,7 @@ namespace mistery_render
 
         virtual bool VertexShade() override
         {
-            this->VertexBfferSRT();
+            this->VertexBufferSRT();
             return true;
         }
 
@@ -402,29 +436,166 @@ namespace mistery_render
         }
         ~TextureShader(){}
 
-        size_t TextureTriangleFragmentShade(size_t idx)
+        size_t TextureTriangleFragmentShade(size_t idx, const GetTextureColor<real_t> &light_func)
         {
-            std::vector<Light *> lights = {};
             TriangleDrawFrame<color_t, GetTextureColor<real_t>, real_t>(this->shader_vertex_buffer[idx], this->shader_vertex_buffer[idx + 1], 
-                                                    this->shader_vertex_buffer[idx + 2], this->zbuffer, lights, *(this->img), ssaa_scale);
+                                                    this->shader_vertex_buffer[idx + 2], this->zbuffer, *(this->img), light_func, ssaa_scale);
             return idx + 3;
         }
 
         virtual bool VertexShade() override
         {
-            this->VertexBfferSRT();
+            this->VertexBufferSRT();
             return true;
         }
 
         virtual bool FragmentShade() override
         {
+            GetTextureColor<real_t> light_functor;
             for (size_t i = 0; i < this->shader_vertex_buffer.size(); i += 3) 
             {
-                this->TextureTriangleFragmentShade(i);
+                this->TextureTriangleFragmentShade(i, light_functor);
             }
             return true;
         }
 
     };
+
+
+    template <class real_t, class color_t>
+    class BlinnPhongShader : public Shader<real_t, color_t>
+    {
+    protected:
+        std::vector<m_math::Vector<real_t, 3>> shader_vertex_buffer_pos = {};
+
+        void PosBufferSRT()
+        {
+            shader_vertex_buffer_pos.resize(this->shader_vertex_buffer.size());
+            for (size_t i = 0; i < this->shader_vertex_buffer.size(); i++)
+            {
+                if (this->shader_vertex_buffer[i].transform != nullptr)
+                {
+                    Transform trans_tmp = *(this->shader_vertex_buffer[i].transform);
+
+                    m_math::Vector<real_t, 4> pos({ this->shader_vertex_buffer[i].position[0], 
+                                                    this->shader_vertex_buffer[i].position[1], 
+                                                    this->shader_vertex_buffer[i].position[2], 
+                                                    this->shader_vertex_buffer[i].position[3] });
+                    pos = trans_tmp.MartrixSRT() * pos;
+                    this->shader_vertex_buffer_pos[i] = m_math::Vector<real_t, 3>({pos[0], pos[1], pos[2]});
+                }
+            }
+        }
+
+    public:
+        int ssaa_scale = 1;
+        BlinnPhongShader(int ssaa_scale_init = 1) : ssaa_scale(ssaa_scale_init)
+        {
+
+        }
+        ~BlinnPhongShader(){}
+
+        size_t BlinnPhongFragmentShade(size_t idx, const GetPhongColor<real_t> &light_func)
+        {
+            TriangleDrawFrame<color_t, GetPhongColor<real_t>, real_t>(this->shader_vertex_buffer[idx], this->shader_vertex_buffer[idx + 1], 
+                                                    this->shader_vertex_buffer[idx + 2], this->zbuffer, *(this->img), light_func, ssaa_scale);
+            return idx + 3;
+        }
+
+        virtual bool VertexShade() override
+        {
+            this->PosBufferSRT();
+            this->NormalBufferSRT();
+            this->VertexBufferSRT();
+            return true;
+        }
+
+        virtual bool FragmentShade() override
+        {
+            GetPhongColor<real_t> light_functor;
+            light_functor.lights = this->shader_light_buffer;
+            for (size_t i = 0; i < this->shader_vertex_buffer.size(); i += 3) 
+            {
+                light_functor.pos_v0 = shader_vertex_buffer_pos[i];
+                light_functor.pos_v1 = shader_vertex_buffer_pos[i+1];
+                light_functor.pos_v2 = shader_vertex_buffer_pos[i+2];
+
+                this->BlinnPhongFragmentShade(i, light_functor);
+            }
+            return true;
+        }
+
+    };
+
+
+
+template <class color_t>
+class CameraRender
+{
+    friend Shader<double, color_t>;
+private:
+    std::shared_ptr<Shader<double, color_t>> shader = nullptr;
+    std::vector<Vertex<double>> vert_buf;
+    std::vector<Light *> light_buf;
+
+public:
+    Image<color_t> * img;
+    Camera * camera;
+
+    CameraRender(Image<color_t> * img_ptr, Camera * cma)
+    {
+        vert_buf.reserve(100000);
+        img = img_ptr;
+        camera = cma;
+    }
+
+    void SetShader(std::shared_ptr<Shader<double, color_t>> shader_ptr)
+    {
+        shader = shader_ptr;
+        shader->SetImgPtr(img);
+    }
+
+    void ClearVertexBuffer()
+    {
+        vert_buf.clear();
+    }
+
+    void PushVertexBuffer(const std::vector<Vertex<double>> &vert_list, Transform * trans)
+    {
+        for (size_t i = 0; i < vert_list.size(); i++)
+        {
+            Vertex<double> vert_tmp = vert_list[i];
+            vert_tmp.transform = trans;
+            vert_buf.emplace_back(vert_tmp);
+        }
+    }
+    void PushVertexBuffer(const Vertex<double> &vert)
+    {
+        vert_buf.emplace_back(vert);
+    }
+
+    void UpdateFromScene(Scene & scene)
+    {
+        for (size_t i = 0; i < scene.meshes.size(); i++)
+        {
+            PushVertexBuffer(scene.meshes[i]->GetVertexList(), &(scene.meshes[i]->transform_origin));
+        }
+        light_buf = scene.lights;
+    }
+
+    void Render()
+    {
+        if (camera == nullptr)
+        {
+            return;
+        }
+        
+        shader->UpdateCameraTransform(camera->transform_origin);
+        shader->BindVertexBuffer(vert_buf);
+        shader->BindLightBuffer(light_buf);
+        shader->VertexShade();
+        shader->FragmentShade();
+    }
+};
 
 }

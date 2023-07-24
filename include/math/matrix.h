@@ -336,6 +336,69 @@ namespace m_math
         }
     };
 
+    template <class T, size_t row>
+    Matrix<T, row, row> InverseMatrix(const Matrix<T, row, row>& A) 
+    {
+        size_t n = row;
+        Matrix<T, row, 2*row> augmented;
+        
+        for (size_t i = 0; i < n; ++i) 
+        {
+            for (size_t j = 0; j < n; ++j) 
+            {
+                augmented[i][j] = A[i][j];
+                augmented[i][j + n] = (i == j) ? 1.0 : 0.0;
+            }
+        }
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            T maxEl = std::abs(augmented[i][i]);
+            size_t maxRow = i;
+            for (size_t k = i + 1; k < n; k++)
+            {
+                if (std::abs(augmented[k][i]) > maxEl)
+                {
+                    maxEl = std::abs(augmented[k][i]);
+                    maxRow = k;
+                }
+            }
+
+            if (maxRow != i)
+            {
+                std::swap(augmented[i], augmented[maxRow]);
+            }
+
+            T scale = augmented[i][i];
+            for (size_t j = i; j < 2 * n; j++)
+            {
+                augmented[i][j] /= scale;
+            }
+
+            for (size_t k = 0; k < n; k++)
+            {
+                if (k == i || augmented[k][i] == 0)
+                    continue;
+                T c = augmented[k][i];
+                for (size_t j = i; j < 2 * n; j++)
+                {
+                    augmented[k][j] -= augmented[i][j] * c;
+                }
+            }
+        }
+
+        Matrix<T, row, row> inv;
+        for (size_t i = 0; i < n; ++i)
+        {
+            for (size_t j = 0; j < n; ++j)
+            {
+                inv[i][j] = augmented[i][j + n];
+            }
+        }
+
+        return inv;
+    }
+
     using Matrix2d = Matrix<double, 2, 2>;
     using Matrix3d = Matrix<double, 3, 3>;
     using Matrix4d = Matrix<double, 4, 4>;
